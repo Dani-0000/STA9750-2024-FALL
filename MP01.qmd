@@ -16,6 +16,7 @@ The first step to was to download, clean, and join the Fare Revenue, Monthly Rid
 if(!require("tidyverse")) install.packages("tidyverse")
 library(dplyr)
 library(tidyverse)
+install.packages("dplyr", repos = "https://cran.rstudio.com/")
 # Let's start with Fare Revenue
 library(tidyverse)
 if(!file.exists("2022_fare_revenue.xlsx")){
@@ -165,6 +166,7 @@ During the analysis of the transit data I found the New York City Transit, has t
 ```{r echo=TRUE, warning=FALSE, message=FALSE}
 #1.	What transit agency had the most total VRM in our data set?
 # New York City Transit. has the highest vehicle revenue miles( VRM ).
+
 USAGE |> 
   drop_na()|>
   select(`Agency`,`Vehicle_Revenue_Miles`) |>
@@ -172,8 +174,10 @@ USAGE |>
   summarize(total_Vehicle_Revenue_Miles = sum(`Vehicle_Revenue_Miles`))|>
   arrange(desc(`total_Vehicle_Revenue_Miles`))|>
 print(USAGE)
+
 #2.	What transit mode had the most total VRM in our data set?
 # BUS(MB)
+
 USAGE |> 
   drop_na() |>
   select(`Mode`,`Vehicle_Revenue_Miles`) |>
@@ -181,8 +185,10 @@ USAGE |>
   summarize(sum_Vehicle_Revenue_Miles_Mode= sum(`Vehicle_Revenue_Miles`))|>
   arrange(desc(`sum_Vehicle_Revenue_Miles_Mode`))|>
 print(sum_Vehicle_Revenue_Miles_Mode)
+
 #3.	How many trips were taken on the NYC Subway (Heavy Rail) in May 2024?
 #In May 2024 the NYC Subway (Heavy Rail) had taken 180,458,819 trips
+
 Heavy_Rail_TRIPS <- USAGE|>
   drop_na()|>
   select(`Mode`,`month`,`Agency`,`Unlinked_Passenger_Trips`)|>
@@ -208,34 +214,40 @@ Heavy_Rail_TRIPS <- USAGE|>
 print(`Heavy_Rail_TRIPS`)
 
 #5. What month had the highest VRM?
+
 Month_Highest_VRM <- USAGE |> 
   drop_na() |>
   select(`Mode`,`Vehicle_Revenue_Miles`,`month`) |>
   group_by(`month`)|>
   summarize(sum_Vehicle_Revenue_Miles_Mode= sum(`Vehicle_Revenue_Miles`))|>
   arrange(desc(`sum_Vehicle_Revenue_Miles_Mode`))|>
-print(`USAGE` )                                               
+print(`USAGE` )      
+
 #6 What are the top three agencies with the highest Unlinked Passanger Trips
+
 top_agencies <- USAGE |>
   group_by(Agency) |>
   summarise(sum_UPT = sum(Unlinked_Passenger_Trips, na.rm = TRUE)) |>
   arrange(desc(sum_UPT))|>
 print(`top_agencies`)
+
 #7 What month had the highest Unlinked Passanger Trips?
+
 highest_month_UPT <- USAGE |>
   group_by(month) |>
   summarise(sum_UPT_by_month = sum(Unlinked_Passenger_Trips, na.rm = TRUE)) |>
   arrange(desc(sum_UPT_by_month))|>
 print(highest_month_UPT)
+
 ```
 
 ## **Table Summarization**
 
 The final step of this project involved creating a new table from the Usage table that summed the annual Unlinked Passenger Trips (UPT) and Vehicle Revenue Miles (VRM) for 2022. UPT measures the number of rides taken, while VRM indicates the total distance traveled by the transit provider. I named this new table USAGE 2022 ANNUAL, which was then joined with the FINANCIALS table. Before joining the tables, I converted the modes in the FINANCIALS table to ensure they matched those in the USAGE 2022 ANNUAL table. Based on the analysis of the transit data for 2022, several key insights emerged regarding the performance and efficiency of various transit systems. The MTA New York City Transit, Heavy Rail, had the highest Unlinked Passenger Trips (UPT), totaling 1,793,073,801 rides, this may be driven by the city’s large population.
 
-In contrast, the Transit Authority of Central Kentucky, Vanpool, demonstrated strong financial sustainability with the highest farebox recovery ratio. The Vanpool has a ratio of fare box recovery of 2.384745, suggesting less reliance on other funding sources. Meanwhile, the North Carolina State University, Vanpool, exhibited the lowest expenses per UPT, at 1.17912 suggesting it has better fare values for riders. Additionally, the Demand Response for Altoona Metro Transit had the highest total fares per UPT, totaling 656.0769 meaning more riders paying for transportation. While the New Mexico Department of Transportation Vanpool maintained the lowest expenses per Vehicle Revenue Mile (VRM) with a total of 0.3366857.  Compared to the New Mexico Department of Transportation Vanpool, the Chicago Water Taxi (Wendella) – Ferryboat has the highest total fares per VRM with a total of New Mexico Department of Transportation Vanpool. In terms of financial efficiency, the Transit Authority of Central Kentucky, Vanpool, might be considered one of the most efficient. However, in this project operational costs and ridership were the priority, so North Carolina State University, Vanpool is a better choice in terms of farebox.
+In contrast, the Transit Authority of Central Kentucky, Vanpool, demonstrated strong financial sustainability with the highest farebox recovery ratio. The Vanpool has a ratio of fare box recovery of 2.384745, suggesting less reliance on other funding sources. Meanwhile, the North Carolina State University, Vanpool, exhibited the lowest expenses per UPT, at 1.17912 suggesting it has better fare values for riders. Additionally, the Demand Response for Altoona Metro Transit had the highest total fares per UPT, totaling 656.0769 meaning more riders paying for transportation. While the New Mexico Department of Transportation Vanpool maintained the lowest expenses per Vehicle Revenue Mile (VRM) with a total of 0.3366857. Compared to the New Mexico Department of Transportation Vanpool, the Chicago Water Taxi (Wendella) – Ferryboat has the highest total fares per VRM with a total of New Mexico Department of Transportation Vanpool. In terms of financial efficiency, the Transit Authority of Central Kentucky, Vanpool, might be considered one of the most efficient. However, in this project operational costs and ridership were the priority, so North Carolina State University, Vanpool is a better choice in terms of farebox.
 
-```{r echo=TRUE, warning=FALSE, message=FALSE}
+``` {r echo=TRUE, warning=FALSE, message=FALSE}
 
 USAGE_2022_ANNUAL <- USAGE |>
   filter(year(month) == 2022) |>
@@ -246,6 +258,7 @@ USAGE_2022_ANNUAL <- USAGE |>
   ) |>
   ungroup()|>
 print(USAGE_2022_ANNUAL)
+
 FINANCIALS <- FINANCIALS |>
   mutate(Mode=case_when(
     Mode == "HR" ~ "Heavy Rail", 
@@ -307,4 +320,5 @@ USAGE_AND_FINANCIALS <- USAGE_AND_FINANCIALS |>
   filter(Highest_total_fares_PERVRM == max(Highest_total_fares_PERVRM, na.rm = TRUE))|>
 
 print(USAGE_AND_FINANCIALS)
+
 ```
