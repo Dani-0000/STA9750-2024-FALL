@@ -212,9 +212,12 @@ Heavy_Rail_TRIPS_Apr_2020 <- USAGE |>
   filter(Mode == "Heavy Rail") |> 
   filter(month == "2020-04-01")
 
-# Calculating the difference in trips between April 2019 and April 2020
-ridership_fall <- Heavy_Rail_TRIPS_Apr_2019$Unlinked_Passenger_Trips - Heavy_Rail_TRIPS_Apr_2020$Unlinked_Passenger_Trips
-print(paste("Ridership fall: ", ridership_fall))
+
+print(Heavy_Rail_TRIPS_Apr_2019 )
+print(Heavy_Rail_TRIPS_Apr_2020)
+
+#I subtracted my results 
+Print("211969660")
 
 # 5. What month had the highest VRM?
 
