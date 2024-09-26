@@ -164,81 +164,82 @@ USAGE <- USAGE |> select(-`3 Mode`)
 During the analysis of the transit data I found the New York City Transit, has the highest vehicle revenue miles( VRM ). This means that of all the agencies the New York City Transit traveled the farthest in total. New York City Transit having the highest VRM maybe because its busier than most transit systems and has more station and more routes. Even though the New York City transit was the agency with the highest VRM, the highest mode from the data was the Bus (MB). The bus was the mode with the highest VRM because buses operate more frequently and operate on a fixed schedule. I was also able to filter by month, Unlinked Passenger Trips and New York City Transit to find the total number of trips taken in May 2024. I found the NYC Subway (Heavy Rail) had 180,458,819 trips in the month of May. If we take that number and divide it by 31 that's about 5,821,252 trips that were taken daily. Between April 2019 and April 2020 ridership fell to 211,969,660. This can be attributed to the Covid-19 lock down that was announced in March 2020. The month with the highest VRM and UPT was in October 2019. The Top three agencies with the highest UPT is MTA New York City Transit, Chicago Transit Authority, and Los Angeles County Metropolitan Transportation Authority.
 
 ```{r echo=TRUE, warning=FALSE, message=FALSE}
-#1.	What transit agency had the most total VRM in our data set?
-# New York City Transit. has the highest vehicle revenue miles( VRM ).
+# 1. What transit agency had the most total VRM in our dataset?
 
-USAGE |> 
+agency_highest_VRM <- USAGE |> 
   drop_na()|>
-  select(`Agency`,`Vehicle_Revenue_Miles`) |>
-  group_by(`Agency`)|>
-  summarize(total_Vehicle_Revenue_Miles = sum(`Vehicle_Revenue_Miles`))|>
-  arrange(desc(`total_Vehicle_Revenue_Miles`))|>
-print(USAGE)
+  select(Agency, Vehicle_Revenue_Miles) |>
+  group_by(Agency) |>
+  summarize(total_Vehicle_Revenue_Miles = sum(Vehicle_Revenue_Miles)) |>
+  arrange(desc(total_Vehicle_Revenue_Miles))
+print(agency_highest_VRM)
 
-#2.	What transit mode had the most total VRM in our data set?
-# BUS(MB)
+# 2. What transit mode had the most total VRM in our dataset?
 
-USAGE |> 
+mode_highest_VRM <- USAGE |> 
   drop_na() |>
-  select(`Mode`,`Vehicle_Revenue_Miles`) |>
-  group_by(`Mode`)|>
-  summarize(sum_Vehicle_Revenue_Miles_Mode= sum(`Vehicle_Revenue_Miles`))|>
-  arrange(desc(`sum_Vehicle_Revenue_Miles_Mode`))|>
-print(sum_Vehicle_Revenue_Miles_Mode)
+  select(Mode, Vehicle_Revenue_Miles) |>
+  group_by(Mode) |>
+  summarize(sum_Vehicle_Revenue_Miles_Mode = sum(Vehicle_Revenue_Miles)) |>
+  arrange(desc(sum_Vehicle_Revenue_Miles_Mode))
+print(mode_highest_VRM)
 
-#3.	How many trips were taken on the NYC Subway (Heavy Rail) in May 2024?
-#In May 2024 the NYC Subway (Heavy Rail) had taken 180,458,819 trips
+# 3. How many trips were taken on the NYC Subway (Heavy Rail) in May 2024?
 
-Heavy_Rail_TRIPS <- USAGE|>
-  drop_na()|>
-  select(`Mode`,`month`,`Agency`,`Unlinked_Passenger_Trips`)|>
-  filter(Agency == "MTA New York City Transit")|> 
-  filter(Mode == "Heavy Rail")|>
-  filter(month == "2024-05-01")|>
-print(`Heavy_Rail_TRIPS`)
+Heavy_Rail_TRIPS_May_2024 <- USAGE |> 
+  drop_na() |>
+  select(Mode, month, Agency, Unlinked_Passenger_Trips) |>
+  filter(Agency == "MTA New York City Transit") |> 
+  filter(Mode == "Heavy Rail") |> 
+  filter(month == "2024-05-01")
+print(Heavy_Rail_TRIPS_May_2024)
 
-#4. How much did NYC subway ridership fall between April 2019 and April 2020?         
-#subtraction: 232223929 - 20254269 = 211,969,660
-Heavy_Rail_TRIPS <- USAGE|>
-  drop_na()|>
-  select(`Mode`,`month`,`Agency`,`Unlinked_Passenger_Trips`)|>
-  filter(Agency == "MTA New York City Transit")|> 
-  filter(Mode == "Heavy Rail")|>
+# 4. How much did NYC subway ridership fall between April 2019 and April 2020?
+
+# Data for April 2019
+Heavy_Rail_TRIPS_Apr_2019 <- USAGE |> 
+  drop_na() |>
+  select(Mode, month, Agency, Unlinked_Passenger_Trips) |>
+  filter(Agency == "MTA New York City Transit") |> 
+  filter(Mode == "Heavy Rail") |> 
   filter(month == "2019-04-01")
-Heavy_Rail_TRIPS <- USAGE|>
-  drop_na()|>
-  select(`Mode`,`month`,`Agency`,`Unlinked_Passenger_Trips`)|>
-  filter(Agency == "MTA New York City Transit")|> 
-  filter(Mode == "Heavy Rail")|>
-  filter(month == "2020-04-01")|>
-print(`Heavy_Rail_TRIPS`)
 
-#5. What month had the highest VRM?
+# Data for April 2020
+Heavy_Rail_TRIPS_Apr_2020 <- USAGE |> 
+  drop_na() |>
+  select(Mode, month, Agency, Unlinked_Passenger_Trips) |>
+  filter(Agency == "MTA New York City Transit") |> 
+  filter(Mode == "Heavy Rail") |> 
+  filter(month == "2020-04-01")
+
+# Calculating the difference in trips between April 2019 and April 2020
+ridership_fall <- Heavy_Rail_TRIPS_Apr_2019$Unlinked_Passenger_Trips - Heavy_Rail_TRIPS_Apr_2020$Unlinked_Passenger_Trips
+print(paste("Ridership fall: ", ridership_fall))
+
+# 5. What month had the highest VRM?
 
 Month_Highest_VRM <- USAGE |> 
   drop_na() |>
-  select(`Mode`,`Vehicle_Revenue_Miles`,`month`) |>
-  group_by(`month`)|>
-  summarize(sum_Vehicle_Revenue_Miles_Mode= sum(`Vehicle_Revenue_Miles`))|>
-  arrange(desc(`sum_Vehicle_Revenue_Miles_Mode`))|>
-print(`USAGE` )      
+  select(Mode, Vehicle_Revenue_Miles, month) |>
+  group_by(month) |>
+  summarize(sum_Vehicle_Revenue_Miles_Mode = sum(Vehicle_Revenue_Miles)) |>
+  arrange(desc(sum_Vehicle_Revenue_Miles_Mode))
+print(Month_Highest_VRM)
 
-#6 What are the top three agencies with the highest Unlinked Passanger Trips
+# 6. What are the top three agencies with the highest Unlinked Passenger Trips?
 
-top_agencies <- USAGE |>
+top_agencies_UPT <- USAGE |> 
   group_by(Agency) |>
   summarise(sum_UPT = sum(Unlinked_Passenger_Trips, na.rm = TRUE)) |>
-  arrange(desc(sum_UPT))|>
-print(`top_agencies`)
+  arrange(desc(sum_UPT)) 
 
-#7 What month had the highest Unlinked Passanger Trips?
+# 7. What month had the highest Unlinked Passenger Trips?
 
-highest_month_UPT <- USAGE |>
+highest_month_UPT <- USAGE |> 
   group_by(month) |>
   summarise(sum_UPT_by_month = sum(Unlinked_Passenger_Trips, na.rm = TRUE)) |>
-  arrange(desc(sum_UPT_by_month))|>
+  arrange(desc(sum_UPT_by_month))
 print(highest_month_UPT)
-
 ```
 
 ## **Table Summarization**
@@ -247,8 +248,8 @@ The final step of this project involved creating a new table from the Usage tabl
 
 In contrast, the Transit Authority of Central Kentucky, Vanpool, demonstrated strong financial sustainability with the highest farebox recovery ratio. The Vanpool has a ratio of fare box recovery of 2.384745, suggesting less reliance on other funding sources. Meanwhile, the North Carolina State University, Vanpool, exhibited the lowest expenses per UPT, at 1.17912 suggesting it has better fare values for riders. Additionally, the Demand Response for Altoona Metro Transit had the highest total fares per UPT, totaling 656.0769 meaning more riders paying for transportation. While the New Mexico Department of Transportation Vanpool maintained the lowest expenses per Vehicle Revenue Mile (VRM) with a total of 0.3366857. Compared to the New Mexico Department of Transportation Vanpool, the Chicago Water Taxi (Wendella) – Ferryboat has the highest total fares per VRM with a total of New Mexico Department of Transportation Vanpool. In terms of financial efficiency, the Transit Authority of Central Kentucky, Vanpool, might be considered one of the most efficient. However, in this project operational costs and ridership were the priority, so North Carolina State University, Vanpool is a better choice in terms of farebox.
 
-``` {r echo=TRUE, warning=FALSE, message=FALSE}
-
+```{r echo=TRUE, warning=FALSE, message=FALSE}
+# Prepare the annual data for 2022
 USAGE_2022_ANNUAL <- USAGE |>
   filter(year(month) == 2022) |>
   group_by(`NTD ID`, Agency, metro_area, Mode) |>
@@ -256,69 +257,74 @@ USAGE_2022_ANNUAL <- USAGE |>
     UPT = sum(Unlinked_Passenger_Trips, na.rm=TRUE),
     VRM = sum(Vehicle_Revenue_Miles, na.rm=TRUE)
   ) |>
-  ungroup()|>
-print(USAGE_2022_ANNUAL)
+  ungroup()
 
+# Standardize the mode names in the financials dataset
 FINANCIALS <- FINANCIALS |>
-  mutate(Mode=case_when(
+  mutate(Mode = case_when(
     Mode == "HR" ~ "Heavy Rail", 
-    Mode == "DR"~"Demand Response",
-    Mode == "FB"~"Ferryboat",
-    Mode == "MB"~"Bus",
-    Mode == "SR"~"Streetcar Rail",
-    Mode == "TB"~"Trolleybus",
-    Mode == "VP"~"Vanpool",
-    Mode == "CB"~"Commuter Bus",
-    Mode == "RB"~"Bus Rapid Transit",
-    Mode == "LR"~"Light Rail",
-    Mode == "YR"~"Hybrid Rail",
-    Mode == "MG"~"Monorail Automated Guideway",
-    Mode == "CR"~"Commuter Rail",
-    Mode == "AR"~"Alaska Railroad",
-    Mode == "TR"~"Aerial Tramway",
-    Mode == "IP"~"Inclined Plane",
-    Mode == "PB"~"Publico",
-    Mode == "CC"~"Cable Car",
-    TRUE~"Unknown"))
+    Mode == "DR" ~ "Demand Response",
+    Mode == "FB" ~ "Ferryboat",
+    Mode == "MB" ~ "Bus",
+    Mode == "SR" ~ "Streetcar Rail",
+    Mode == "TB" ~ "Trolleybus",
+    Mode == "VP" ~ "Vanpool",
+    Mode == "CB" ~ "Commuter Bus",
+    Mode == "RB" ~ "Bus Rapid Transit",
+    Mode == "LR" ~ "Light Rail",
+    Mode == "YR" ~ "Hybrid Rail",
+    Mode == "MG" ~ "Monorail Automated Guideway",
+    Mode == "CR" ~ "Commuter Rail",
+    Mode == "AR" ~ "Alaska Railroad",
+    Mode == "TR" ~ "Aerial Tramway",
+    Mode == "IP" ~ "Inclined Plane",
+    Mode == "PB" ~ "Publico",
+    Mode == "CC" ~ "Cable Car",
+    TRUE ~ "Unknown"
+  ))
 
-USAGE_AND_FINANCIALS <- left_join(USAGE_2022_ANNUAL, 
-                                  FINANCIALS, 
-                                  join_by(`NTD ID`, `Mode`)) |>
+# Join USAGE and FINANCIALS data by NTD ID and Mode
+USAGE_AND_FINANCIALS <- left_join(USAGE_2022_ANNUAL, FINANCIALS, join_by(`NTD ID`, `Mode`)) |>
   drop_na()
 
-#1. Which transit system (agency and mode) had the most UPT in 2022?
-#The MTA New York City Transit, Heavy Rail, had the most UPT in 2022 totaling 1,793,073,801.
+# 1. Which transit system (agency and mode) had the most UPT in 2022?
+most_UPT <- USAGE_AND_FINANCIALS |>
+  filter(UPT == max(UPT, na.rm = TRUE)) |>
+  select(Agency, Mode, UPT)
+print(most_UPT)
 
-#2. Which transit system (agency and mode) had the highest farebox recovery, defined as the highest ratio of Total Fares to Expenses?
-#The Transit Authority of Central Kentucky, Vanpool, has a fare box recovery of 2.384745
-USAGE_AND_FINANCIALS <- USAGE_AND_FINANCIALS |>
-  mutate(farebox_recovery = `Total Fares`/Expenses)|>
-  filter(farebox_recovery == max(farebox_recovery,na.rm = TRUE ))|>
-print(USAGE_AND_FINANCIALS)
-#3.Which transit system (agency and mode) has the lowest expenses per UPT?
-#The North Carolina State University- BUS -  1.17912
-USAGE_AND_FINANCIALS <- USAGE_AND_FINANCIALS |>
-  mutate(Lowest_Expense = Expenses/UPT)|>
-  filter(Lowest_Expense == min(Lowest_Expense,na.rm = TRUE ))|>
-print(USAGE_AND_FINANCIALS)
-#4 Which transit system (agency and mode) has the highest total fares per UPT?
-# Altoona Metro Transit Mode:Demand Response  total: 656.0769
-USAGE_AND_FINANCIALS <- USAGE_AND_FINANCIALS |>
-  mutate(Highest_total_fares = `Total Fares`/UPT)|>
-  filter(Highest_total_fares == max(Highest_total_fares,na.rm = TRUE ))|>
-print(USAGE_AND_FINANCIALS)
-#5Which transit system (agency and mode) has the lowest expenses per VRM?
-#. New Mexico Department of Transportation - Vanpool - total: 0.3366857
-USAGE_AND_FINANCIALS <- USAGE_AND_FINANCIALS |>
-  mutate(Lowest_transit_expenses = Expenses/VRM)|>
-  filter(Lowest_transit_expenses == min(Lowest_transit_expenses,na.rm = TRUE ))|>
-print(USAGE_AND_FINANCIALS)
-#6 Which transit system (agency and mode) has the highest total fares per VRM?
-# Chicago Water Taxi (Wendella) - Ferryboat - 237.455
-USAGE_AND_FINANCIALS <- USAGE_AND_FINANCIALS |>
-  mutate(Highest_total_fares_PERVRM = `Total Fares` / VRM) |>
-  filter(Highest_total_fares_PERVRM == max(Highest_total_fares_PERVRM, na.rm = TRUE))|>
+# 2. Which transit system (agency and mode) had the highest farebox recovery (Total Fares / Expenses)?
+highest_farebox_recovery <- USAGE_AND_FINANCIALS |>
+  mutate(farebox_recovery = `Total Fares` / Expenses) |>
+  filter(farebox_recovery == max(farebox_recovery, na.rm = TRUE)) |>
+  select(Agency, Mode, farebox_recovery)
+print(highest_farebox_recovery)
 
-print(USAGE_AND_FINANCIALS)
+# 3. Which transit system (agency and mode) has the lowest expenses per UPT?
+lowest_expense_per_UPT <- USAGE_AND_FINANCIALS |>
+  mutate(expenses_per_UPT = Expenses / UPT) |>
+  filter(expenses_per_UPT == min(expenses_per_UPT, na.rm = TRUE)) |>
+  select(Agency, Mode, expenses_per_UPT)
+print(lowest_expense_per_UPT)
 
+# 4. Which transit system (agency and mode) has the highest total fares per UPT?
+highest_fares_per_UPT <- USAGE_AND_FINANCIALS |>
+  mutate(fares_per_UPT = `Total Fares` / UPT) |>
+  filter(fares_per_UPT == max(fares_per_UPT, na.rm = TRUE)) |>
+  select(Agency, Mode, fares_per_UPT)
+print(highest_fares_per_UPT)
+
+# 5. Which transit system (agency and mode) has the lowest expenses per VRM?
+lowest_expenses_per_VRM <- USAGE_AND_FINANCIALS |>
+  mutate(expenses_per_VRM = Expenses / VRM) |>
+  filter(expenses_per_VRM == min(expenses_per_VRM, na.rm = TRUE)) |>
+  select(Agency, Mode, expenses_per_VRM)
+print(lowest_expenses_per_VRM)
+
+# 6. Which transit system (agency and mode) has the highest total fares per VRM?
+highest_fares_per_VRM <- USAGE_AND_FINANCIALS |>
+  mutate(fares_per_VRM = `Total Fares` / VRM) |>
+  filter(fares_per_VRM == max(fares_per_VRM, na.rm = TRUE)) |>
+  select(Agency, Mode, fares_per_VRM)
+print(highest_fares_per_VRM)
 ```
