@@ -227,6 +227,7 @@ TITLE_BASICS|>
 ## Quantifying Success
 
 Based on the IMDb entries, I built a success metric using the Ratings table, joining it with the Title Basic table. Once the two tables were joined, I calculated the success metric by dividing the number of votes by the average ratings. I then filtered the data down to the primary title and success metric. This metric suggests that a higher value implies that the movie attracted a large number of votes, even if its average rating was not as high.
+
 ```{r}
 echo = FALSE
 Success_Metric <- TITLE_RATINGS |>
