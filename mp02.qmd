@@ -1,0 +1,381 @@
+---
+title: "mp02"
+editor: visual
+---
+
+```{r echo = FALSE}
+echo = FALSE
+library(dplyr)
+library(tidyverse)
+```
+
+```{r}
+echo = FALSE
+get_imdb_file <- function(fname){
+    BASE_URL <- "https://datasets.imdbws.com/"
+    fname_ext <- paste0(fname, ".tsv.gz")
+    if(!file.exists(fname_ext)){
+        FILE_URL <- paste0(BASE_URL, fname_ext)
+        download.file(FILE_URL, 
+                      destfile = fname_ext)
+    }
+    as.data.frame(readr::read_tsv(fname_ext, lazy=FALSE))
+}
+
+NAME_BASICS      <- get_imdb_file("name.basics")
+```
+
+```{r}
+echo = FALSE
+TITLE_BASICS     <- get_imdb_file("title.basics")
+```
+
+```{r}
+echo = FALSE
+TITLE_EPISODES   <- get_imdb_file("title.episode")
+```
+
+```{r}
+echo = FALSE
+TITLE_RATINGS    <- get_imdb_file("title.ratings")
+```
+
+```{r}
+echo = FALSE
+TITLE_CREW       <- get_imdb_file("title.crew")
+```
+
+```{r}
+echo = FALSE
+TITLE_PRINCIPALS <- get_imdb_file("title.principals")
+```
+
+## Data Sub-Sampling
+
+```{r}
+echo = FALSE
+NAME_BASICS <- NAME_BASICS |> 
+    filter(str_count(knownForTitles, ",") > 1)
+```
+
+```{r}
+echo = FALSE
+TITLE_RATINGS |>
+    ggplot(aes(x=numVotes)) + 
+    geom_histogram(bins=30) +
+    xlab("Number of IMDB Ratings") + 
+    ylab("Number of Titles") + 
+    ggtitle("Majority of IMDB Titles Have Less than 100 Ratings") + 
+    theme_bw() + 
+    scale_x_log10(label=scales::comma) + 
+    scale_y_continuous(label = scales::comma)
+```
+
+```{r}
+echo = FALSE
+TITLE_RATINGS |>
+    pull(numVotes) |>
+    quantile()
+```
+
+```{r}
+echo = FALSE
+TITLE_RATINGS <- TITLE_RATINGS |>
+    filter(numVotes >= 100)
+```
+
+```{r}
+echo = FALSE
+TITLE_BASICS <- TITLE_BASICS |>
+    semi_join(TITLE_RATINGS, 
+              join_by(tconst == tconst))
+
+TITLE_CREW <- TITLE_CREW |>
+    semi_join(TITLE_RATINGS, 
+              join_by(tconst == tconst))
+
+TITLE_EPISODES_1 <- TITLE_EPISODES |>
+    semi_join(TITLE_RATINGS, 
+              join_by(tconst == tconst))
+TITLE_EPISODES_2 <- TITLE_EPISODES |>
+    semi_join(TITLE_RATINGS, 
+              join_by(parentTconst == tconst))
+
+TITLE_EPISODES <- bind_rows(TITLE_EPISODES_1,
+                            TITLE_EPISODES_2) |>
+    distinct()
+
+TITLE_PRINCIPALS <- TITLE_PRINCIPALS |>
+    semi_join(TITLE_RATINGS, join_by(tconst == tconst))
+
+
+rm(TITLE_EPISODES_1)
+rm(TITLE_EPISODES_2)
+```
+
+```{r}
+echo = FALSE
+NAME_BASICS <- NAME_BASICS |>
+    mutate(birthYear = as.numeric(birthYear),
+           deathYear = as.numeric(deathYear))
+```
+
+```{r}
+echo = FALSE
+glimpse(NAME_BASICS)
+```
+
+Task 2:
+
+How many movies are in our data set?
+
+To find the number of movies in our dataset, I used the Title_Basics table and filtered the data to only include entries where the titleType is "movie." After filtering, I summarized the data to calculate the total number of movies.
+
+```{r}
+TITLE_BASICS |>
+  filter(titleType == "movie") |>
+  summarise(total = n())
+```
+
+How many TV series?
+
+```{r}
+TITLE_BASICS |>
+  filter(titleType == "tvSeries") |>
+  summarise(total = n())
+```
+
+How many TV episodes?
+
+```{r}
+TITLE_BASICS |>
+  filter(titleType == "tvEpisode") |>
+  summarise(total = n())
+```
+
+Who is the oldest living person in our data set?
+
+```{r}
+ NAME_BASICS |>
+  filter(is.na(deathYear)) |>  
+  arrange(birthYear) |>        
+  select(primaryName, birthYear) |> 
+  slice(1)
+```
+
+There is one TV Episode in this data set with a perfect 10/10 rating and at least 200,000 IMDb ratings. What is it? What series does it belong to?
+
+From the data, the TV episode with a perfect rating and atleast 200,000 votes is Ozymandias from Breaking Bad.
+
+```{r}
+echo = FALSE
+inner_join(TITLE_RATINGS, 
+           TITLE_BASICS, 
+           by = "tconst") |>
+  drop_na()|>
+  filter(averageRating == 10, numVotes >= 200000)|>
+    select(averageRating,numVotes,primaryTitle,genres)
+```
+
+What four projects is the actor Mark Hamill most known for?
+
+With the Name Basics table, I was able the find Mark Hamill is known for Star Wars: Episode IV - A New Hope, Star Wars: Episode VIII - The Last Jedi, Star Wars: Episode V - The Empire Strikes Back and Star Wars: Episode VI - Return of the Jedi
+
+```{r}
+echo = FALSE
+NAME_BASICS|>
+   filter(primaryName == "Mark Hamill")|>
+  select(primaryName,knownForTitles)|>
+  separate_longer_delim(knownForTitles, ",")|>
+  inner_join(TITLE_BASICS, join_by(knownForTitles == tconst))|>
+  select(primaryTitle)
+```
+
+What TV series, with more than 12 episodes, has the highest average rating?
+
+```{r}
+echo = FALSE
+TITLE_EPISODES|>
+  group_by(parentTconst)|>
+  summarise(totalEpisodes = n())|>
+  filter(totalEpisodes > 12)|>
+  inner_join(TITLE_BASICS, join_by(parentTconst == tconst))|>
+  filter(titleType == "tvSeries")|>
+  select(parentTconst, primaryTitle,totalEpisodes)|>
+  inner_join(TITLE_RATINGS, join_by(parentTconst == tconst))|>
+  arrange(desc(averageRating)) |>
+  select(primaryTitle, totalEpisodes, averageRating) |>
+  slice_head(n = 1)
+```
+
+Is it true that episodes from later seasons of Happy Days have lower average ratings than the early seasons?
+
+Using the Title Basics table, I was able to find that Happy Day ratings averaged 7.4 for each season.
+
+```{r}
+echo = FALSE
+TITLE_BASICS|>
+  filter(titleType == "tvSeries",primaryTitle == "Happy Days")|>
+  inner_join(TITLE_RATINGS, join_by(tconst == tconst))|>
+  inner_join(TITLE_EPISODES, join_by(tconst == parentTconst))|>
+  select(seasonNumber, episodeNumber, averageRating)|>
+  group_by(seasonNumber)|>
+  arrange(desc(seasonNumber))|>
+  summarise(averageSeasonRating = mean(averageRating, na.rm = TRUE))
+```
+
+## Quantifying Success
+
+Based on the IMDb entries, I built a success metric using the Ratings table, joining it with the Title Basic table. Once the two tables were joined, I calculated the success metric by dividing the number of votes by the average ratings. I then filtered the data down to the primary title and success metric. This metric suggests that a higher value implies that the movie attracted a large number of votes, even if its average rating was not as high.
+```{r}
+echo = FALSE
+Success_Metric <- TITLE_RATINGS |>
+  mutate(Success_Metric = `numVotes` / averageRating) |>
+  arrange(desc(Success_Metric)) |>
+  inner_join(TITLE_BASICS, join_by(tconst == tconst)) |>
+  select(primaryTitle, Success_Metric)
+```
+
+```{r echo=TRUE, warning=FALSE, message=FALSE}
+Success_Metric_Top_10 <- TITLE_RATINGS|>
+  mutate(Success_Metric = `numVotes` / averageRating)|>
+  arrange(desc(Success_Metric))|>
+  slice_head(n = 10)|>
+  inner_join(TITLE_BASICS, join_by(tconst == tconst))|>
+  select(primaryTitle,Success_Metric)|>
+  print(Success_Metric_Top_10)
+```
+
+Using the Success Metric table I created previously, I identified that, despite having a large number of votes, Assault, Infected, Hardhome, Fawlty Towers, and The Family Man, have relatively low average ratings. While these films are popular in terms of votes, their average ratings are significantly lower, indicating that they did not resonate well with audiences in terms of quality.
+
+```{r}
+echo = FALSE
+Success_Metric_Low_Quality <- TITLE_RATINGS|>
+  mutate(Success_Metric = `numVotes` / averageRating)|>
+  filter(numVotes > 100000)|>
+  arrange(Success_Metric)|>
+  inner_join(TITLE_BASICS, join_by(tconst == tconst))|>
+  slice_head(n = 5)|>
+  select(Success_Metric,numVotes,primaryTitle)|>
+  print(Success_Metric_Low_Quality)
+```
+
+Choose a prestige actor or director and confirm that they have many projects with high scores on your success metric.
+
+Jordan Peele's projects generally have high success metrics, particularly "Get Out," which stands out as his most successful film both in terms of rating and popularity. This confirms that Peele has many high-scoring projects, particularly in terms of audience reach and reception.
+
+```{r}
+echo = FALSE
+Success_Metric <- TITLE_RATINGS|>
+  mutate(Success_Metric = `numVotes` / averageRating)|>
+  arrange(desc(Success_Metric))|>
+  inner_join(TITLE_BASICS, join_by(tconst == tconst))
+print(Success_Metric)
+```
+
+```{r}
+echo = FALSE
+NAME_BASICS|>
+  filter(primaryName == "Jordan Peele")|>
+    select(primaryName,knownForTitles)|>
+  separate_longer_delim(knownForTitles, ",")|>
+  inner_join(TITLE_BASICS, join_by(knownForTitles == tconst))|>
+  inner_join(TITLE_RATINGS, join_by(knownForTitles == tconst))|>
+  inner_join(Success_Metric, join_by(knownForTitles == tconst))|>
+  select(primaryName,primaryTitle.x,Success_Metric,genres.x)
+```
+
+Perform at least one other form of ‘spot check’ validation.
+
+To validate my finding, I found the average rate based on genre. With this I was able to conclude horror movies don't typically receive high ratings.
+
+```{r}
+echo = FALSE
+Ratings_with_genres <- TITLE_BASICS |>
+  inner_join(TITLE_RATINGS, by = "tconst")|>
+  separate_longer_delim(genres, ",")|>
+  group_by(genres) |>
+  summarise(avg_rating = mean(averageRating, na.rm = TRUE), .groups = 'drop') |>
+  arrange(desc(avg_rating))|>
+  slice_tail(n = 5)
+print(Ratings_with_genres)
+```
+
+```{r}
+echo = FALSE
+ggplot(Ratings_with_genres, aes(x = genres, y = avg_rating)) +
+  geom_point() + 
+  xlab("Genres") + 
+  ylab("Average Rating") +
+  ggtitle("Average Rating by Genre") +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+#Examining Success by Genre and Decade
+
+Highest Rated Genre Per Year
+
+```{r}
+highest_rated_per_year <- TITLE_BASICS |>
+  inner_join(TITLE_RATINGS, join_by(tconst == tconst))|>
+  group_by(startYear)|>
+  filter(averageRating == max(averageRating, na.rm = TRUE))|>
+  arrange(startYear)|>
+  select(primaryTitle,averageRating,startYear,genres)|>
+  print(highest_rated_per_year)
+```
+
+Top Directors
+
+```{r}
+echo = FALSE
+Top_directors <-NAME_BASICS|>
+    separate_longer_delim(primaryProfession, ",")|>
+    filter(primaryProfession == "director")|>
+  separate_longer_delim(knownForTitles, ",")|>
+  inner_join(TITLE_BASICS, join_by(knownForTitles == tconst))|>
+   inner_join(TITLE_RATINGS, join_by(knownForTitles == tconst))|>
+  select(primaryName,averageRating)|>
+  group_by(primaryName)|>
+  summarise(avg_rating = mean(averageRating, na.rm = TRUE), .groups = 'drop') |>
+  arrange(desc(avg_rating))|>
+  slice_head(n=10)|>
+  print(Top_directors)
+```
+
+Top Actors
+
+```{r}
+echo = FALSE
+Top_actors <-NAME_BASICS|>
+    separate_longer_delim(primaryProfession, ",")|>
+    filter(primaryProfession == "actress")|>
+  separate_longer_delim(knownForTitles, ",")|>
+  inner_join(TITLE_BASICS, join_by(knownForTitles == tconst))|>
+   inner_join(TITLE_RATINGS, join_by(knownForTitles == tconst))|>
+  select(primaryName,averageRating)|>
+  group_by(primaryName)|>
+  summarise(avg_rating = mean(averageRating, na.rm = TRUE), .groups = 'drop') |>
+  arrange(desc(avg_rating))|>
+  slice_head(n=10)|>
+  print(Top_actors)
+```
+
+```{r}
+echo = FALSE
+Ratings_with_genres <- TITLE_BASICS |>
+  inner_join(TITLE_RATINGS, by = "tconst")|>
+  separate_longer_delim(genres, ",")|>
+  group_by(genres) |>
+  summarise(avg_rating = mean(averageRating, na.rm = TRUE), .groups = 'drop') |>
+  arrange(desc(avg_rating))|>
+  slice_head(n = 5)|>
+  print(Ratings_with_genres)
+```
+
+## Successful Personnel in the Genre
+
+For my proposed Hollywood project, I propose an animated historical adventure movie. I will aim to film this movie similarly to Minions, but this film would be non-fiction. Animation has an average rating of 7.32, which is currently the highest-rated genre, followed by history and adventure. The combination of animation, history, and adventure has a high chance of success in terms of rating and popularity.
+
+For directing talent, I would have Jordan Peele. Even though Hamid Hemmati has a higher rating, Jordan Peele has achieved a higher success metric with horror films. For the cast, I would have Akshara Nair, whose rating is 9.90, voice over the main character. With the growing demand for animated films and Jordan Peele's ability to build genres, I believe this film will be successful.
