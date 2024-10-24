@@ -67,20 +67,17 @@ TITLE_RATINGS |>
 ```
 
 ```{r echo = FALSE}
-echo = FALSE
 TITLE_RATINGS |>
     pull(numVotes) |>
     quantile()
 ```
 
 ```{r echo = FALSE}
-echo = FALSE
 TITLE_RATINGS <- TITLE_RATINGS |>
     filter(numVotes >= 100)
 ```
 
 ```{r echo = FALSE}
-echo = FALSE
 TITLE_BASICS <- TITLE_BASICS |>
     semi_join(TITLE_RATINGS, 
               join_by(tconst == tconst))
@@ -109,7 +106,6 @@ rm(TITLE_EPISODES_2)
 ```
 
 ```{r echo = FALSE}
-echo = FALSE
 NAME_BASICS <- NAME_BASICS |>
     mutate(birthYear = as.numeric(birthYear),
            deathYear = as.numeric(deathYear))
@@ -256,8 +252,7 @@ Success_Metric <- TITLE_RATINGS|>
   inner_join(TITLE_BASICS, join_by(tconst == tconst))
 ```
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 NAME_BASICS|>
   filter(primaryName == "Jordan Peele")|>
   select(primaryName,knownForTitles)|>
@@ -272,8 +267,7 @@ Perform at least one other form of ‘spot check’ validation.
 
 To validate my finding, I found the average rate based on genre. With this I was able to conclude horror movies don't typically receive high ratings.
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 Ratings_with_genres <- TITLE_BASICS |>
   inner_join(TITLE_RATINGS, by = "tconst")|>
   separate_longer_delim(genres, ",")|>
@@ -285,7 +279,6 @@ print(Ratings_with_genres)
 ```
 
 ```{r}
-echo = FALSE
 ggplot(Ratings_with_genres, aes(x = genres, y = avg_rating)) +
   geom_point() + 
   xlab("Genres") + 
@@ -299,7 +292,7 @@ ggplot(Ratings_with_genres, aes(x = genres, y = avg_rating)) +
 
 Highest Rated Genre Per Year
 
-```{r}
+```{r echo = FALSE}
 highest_rated_per_year <- TITLE_BASICS |>
   inner_join(TITLE_RATINGS, join_by(tconst == tconst))|>
   group_by(startYear)|>
@@ -343,8 +336,7 @@ Top_actors <-NAME_BASICS|>
   print(Top_actors)
 ```
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 Ratings_with_genres <- TITLE_BASICS |>
   inner_join(TITLE_RATINGS, by = "tconst")|>
   separate_longer_delim(genres, ",")|>
