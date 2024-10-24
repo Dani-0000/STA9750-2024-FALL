@@ -1,16 +1,17 @@
 ---
-title: "mp02"
-editor: visual
+title: "Mini Project 2"
 ---
 
+## Introduction
+
+The goal of this project is to generate data-driven ideas for original films by analyzing Hollywood's history and identifying traits of successful movies.
+
 ```{r echo = FALSE}
-echo = FALSE
 library(dplyr)
 library(tidyverse)
 ```
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 get_imdb_file <- function(fname){
     BASE_URL <- "https://datasets.imdbws.com/"
     fname_ext <- paste0(fname, ".tsv.gz")
@@ -25,41 +26,35 @@ get_imdb_file <- function(fname){
 NAME_BASICS      <- get_imdb_file("name.basics")
 ```
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
+
 TITLE_BASICS     <- get_imdb_file("title.basics")
 ```
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 TITLE_EPISODES   <- get_imdb_file("title.episode")
 ```
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 TITLE_RATINGS    <- get_imdb_file("title.ratings")
 ```
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 TITLE_CREW       <- get_imdb_file("title.crew")
 ```
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 TITLE_PRINCIPALS <- get_imdb_file("title.principals")
 ```
 
 ## Data Sub-Sampling
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 NAME_BASICS <- NAME_BASICS |> 
     filter(str_count(knownForTitles, ",") > 1)
 ```
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 TITLE_RATINGS |>
     ggplot(aes(x=numVotes)) + 
     geom_histogram(bins=30) +
@@ -71,20 +66,20 @@ TITLE_RATINGS |>
     scale_y_continuous(label = scales::comma)
 ```
 
-```{r}
+```{r echo = FALSE}
 echo = FALSE
 TITLE_RATINGS |>
     pull(numVotes) |>
     quantile()
 ```
 
-```{r}
+```{r echo = FALSE}
 echo = FALSE
 TITLE_RATINGS <- TITLE_RATINGS |>
     filter(numVotes >= 100)
 ```
 
-```{r}
+```{r echo = FALSE}
 echo = FALSE
 TITLE_BASICS <- TITLE_BASICS |>
     semi_join(TITLE_RATINGS, 
@@ -113,19 +108,14 @@ rm(TITLE_EPISODES_1)
 rm(TITLE_EPISODES_2)
 ```
 
-```{r}
+```{r echo = FALSE}
 echo = FALSE
 NAME_BASICS <- NAME_BASICS |>
     mutate(birthYear = as.numeric(birthYear),
            deathYear = as.numeric(deathYear))
 ```
 
-```{r}
-echo = FALSE
-glimpse(NAME_BASICS)
-```
-
-Task 2:
+## Task 2:
 
 How many movies are in our data set?
 
@@ -165,10 +155,9 @@ Who is the oldest living person in our data set?
 
 There is one TV Episode in this data set with a perfect 10/10 rating and at least 200,000 IMDb ratings. What is it? What series does it belong to?
 
-From the data, the TV episode with a perfect rating and atleast 200,000 votes is Ozymandias from Breaking Bad.
+From the data, the TV episode with a perfect rating and at least 200,000 votes is Ozymandias from Breaking Bad.
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 inner_join(TITLE_RATINGS, 
            TITLE_BASICS, 
            by = "tconst") |>
@@ -181,8 +170,7 @@ What four projects is the actor Mark Hamill most known for?
 
 With the Name Basics table, I was able the find Mark Hamill is known for Star Wars: Episode IV - A New Hope, Star Wars: Episode VIII - The Last Jedi, Star Wars: Episode V - The Empire Strikes Back and Star Wars: Episode VI - Return of the Jedi
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 NAME_BASICS|>
    filter(primaryName == "Mark Hamill")|>
   select(primaryName,knownForTitles)|>
@@ -193,8 +181,7 @@ NAME_BASICS|>
 
 What TV series, with more than 12 episodes, has the highest average rating?
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 TITLE_EPISODES|>
   group_by(parentTconst)|>
   summarise(totalEpisodes = n())|>
@@ -212,8 +199,7 @@ Is it true that episodes from later seasons of Happy Days have lower average rat
 
 Using the Title Basics table, I was able to find that Happy Day ratings averaged 7.4 for each season.
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 TITLE_BASICS|>
   filter(titleType == "tvSeries",primaryTitle == "Happy Days")|>
   inner_join(TITLE_RATINGS, join_by(tconst == tconst))|>
@@ -229,7 +215,6 @@ TITLE_BASICS|>
 Based on the IMDb entries, I built a success metric using the Ratings table, joining it with the Title Basic table. Once the two tables were joined, I calculated the success metric by dividing the number of votes by the average ratings. I then filtered the data down to the primary title and success metric. This metric suggests that a higher value implies that the movie attracted a large number of votes, even if its average rating was not as high.
 
 ```{r}
-echo = FALSE
 Success_Metric <- TITLE_RATINGS |>
   mutate(Success_Metric = `numVotes` / averageRating) |>
   arrange(desc(Success_Metric)) |>
@@ -249,8 +234,7 @@ Success_Metric_Top_10 <- TITLE_RATINGS|>
 
 Using the Success Metric table I created previously, I identified that, despite having a large number of votes, Assault, Infected, Hardhome, Fawlty Towers, and The Family Man, have relatively low average ratings. While these films are popular in terms of votes, their average ratings are significantly lower, indicating that they did not resonate well with audiences in terms of quality.
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 Success_Metric_Low_Quality <- TITLE_RATINGS|>
   mutate(Success_Metric = `numVotes` / averageRating)|>
   filter(numVotes > 100000)|>
@@ -265,20 +249,18 @@ Choose a prestige actor or director and confirm that they have many projects wit
 
 Jordan Peele's projects generally have high success metrics, particularly "Get Out," which stands out as his most successful film both in terms of rating and popularity. This confirms that Peele has many high-scoring projects, particularly in terms of audience reach and reception.
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 Success_Metric <- TITLE_RATINGS|>
   mutate(Success_Metric = `numVotes` / averageRating)|>
   arrange(desc(Success_Metric))|>
   inner_join(TITLE_BASICS, join_by(tconst == tconst))
-print(Success_Metric)
 ```
 
 ```{r}
 echo = FALSE
 NAME_BASICS|>
   filter(primaryName == "Jordan Peele")|>
-    select(primaryName,knownForTitles)|>
+  select(primaryName,knownForTitles)|>
   separate_longer_delim(knownForTitles, ",")|>
   inner_join(TITLE_BASICS, join_by(knownForTitles == tconst))|>
   inner_join(TITLE_RATINGS, join_by(knownForTitles == tconst))|>
@@ -313,7 +295,7 @@ ggplot(Ratings_with_genres, aes(x = genres, y = avg_rating)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-#Examining Success by Genre and Decade
+## Examining Success by Genre and Decade
 
 Highest Rated Genre Per Year
 
@@ -329,8 +311,7 @@ highest_rated_per_year <- TITLE_BASICS |>
 
 Top Directors
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 Top_directors <-NAME_BASICS|>
     separate_longer_delim(primaryProfession, ",")|>
     filter(primaryProfession == "director")|>
@@ -347,8 +328,7 @@ Top_directors <-NAME_BASICS|>
 
 Top Actors
 
-```{r}
-echo = FALSE
+```{r echo = FALSE}
 Top_actors <-NAME_BASICS|>
     separate_longer_delim(primaryProfession, ",")|>
     filter(primaryProfession == "actress")|>
