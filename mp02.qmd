@@ -224,7 +224,8 @@ Success_Metric_Top_10 <- TITLE_RATINGS|>
   arrange(desc(Success_Metric))|>
   slice_head(n = 10)|>
   inner_join(TITLE_BASICS, join_by(tconst == tconst))|>
-  select(primaryTitle,Success_Metric)|>
+  select(primaryTitle,Success_Metric)
+
   print(Success_Metric_Top_10)
 ```
 
@@ -237,7 +238,8 @@ Success_Metric_Low_Quality <- TITLE_RATINGS|>
   arrange(Success_Metric)|>
   inner_join(TITLE_BASICS, join_by(tconst == tconst))|>
   slice_head(n = 5)|>
-  select(Success_Metric,numVotes,primaryTitle)|>
+  select(Success_Metric,numVotes,primaryTitle)
+
   print(Success_Metric_Low_Quality)
 ```
 
@@ -298,7 +300,8 @@ highest_rated_per_year <- TITLE_BASICS |>
   group_by(startYear)|>
   filter(averageRating == max(averageRating, na.rm = TRUE))|>
   arrange(startYear)|>
-  select(primaryTitle,averageRating,startYear,genres)|>
+  select(primaryTitle,averageRating,startYear,genres)
+
   print(highest_rated_per_year)
 ```
 
@@ -315,7 +318,8 @@ Top_directors <-NAME_BASICS|>
   group_by(primaryName)|>
   summarise(avg_rating = mean(averageRating, na.rm = TRUE), .groups = 'drop') |>
   arrange(desc(avg_rating))|>
-  slice_head(n=10)|>
+  slice_head(n=10)
+
   print(Top_directors)
 ```
 
@@ -332,7 +336,8 @@ Top_actors <-NAME_BASICS|>
   group_by(primaryName)|>
   summarise(avg_rating = mean(averageRating, na.rm = TRUE), .groups = 'drop') |>
   arrange(desc(avg_rating))|>
-  slice_head(n=10)|>
+  slice_head(n=10)
+
   print(Top_actors)
 ```
 
@@ -343,7 +348,8 @@ Ratings_with_genres <- TITLE_BASICS |>
   group_by(genres) |>
   summarise(avg_rating = mean(averageRating, na.rm = TRUE), .groups = 'drop') |>
   arrange(desc(avg_rating))|>
-  slice_head(n = 5)|>
+  slice_head(n = 5)
+
   print(Ratings_with_genres)
 ```
 
