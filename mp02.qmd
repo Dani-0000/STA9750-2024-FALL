@@ -358,3 +358,5 @@ Ratings_with_genres <- TITLE_BASICS |>
 For my proposed Hollywood project, I propose an animated historical adventure movie. I will aim to film this movie similarly to Minions, but this film would be non-fiction. Animation has an average rating of 7.32, which is currently the highest-rated genre, followed by history and adventure. The combination of animation, history, and adventure has a high chance of success in terms of rating and popularity.
 
 For directing talent, I would have Jordan Peele. Even though Hamid Hemmati has a higher rating, Jordan Peele has achieved a higher success metric with horror films. For the cast, I would have Akshara Nair, whose rating is 9.90, voice over the main character. With the growing demand for animated films and Jordan Peele's ability to build genres, I believe this film will be successful.
+
+
