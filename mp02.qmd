@@ -355,8 +355,8 @@ Ratings_with_genres <- TITLE_BASICS |>
 
 ## Successful Personnel in the Genre
 
-For my proposed Hollywood project, I propose an animated historical adventure movie. I will aim to film this movie similarly to Minions, but this film would be non-fiction. Animation has an average rating of 7.32, which is currently the highest-rated genre, followed by history and adventure. The combination of animation, history, and adventure has a high chance of success in terms of rating and popularity.
+For my proposed Hollywood project, I plan to remake the 2010 sci-fi/action film Inception. To add a unique twist, I would incorporate elements of horror to enhance audience engagement. Although horror tends to have a lower average rating, I believe that bringing Jordan Peele on as a co-director could elevate this film. While Hamid Hemmati has a higher average rating, Jordan Peele has achieved greater success metrics within the horror genre.
 
-For directing talent, I would have Jordan Peele. Even though Hamid Hemmati has a higher rating, Jordan Peele has achieved a higher success metric with horror films. For the cast, I would have Akshara Nair, whose rating is 9.90, voice over the main character. With the growing demand for animated films and Jordan Peele's ability to build genres, I believe this film will be successful.
+For casting, I would retain Leonardo DiCaprio and also bring in Morgan Freeman, not only for his experience in high-grossing films but also for his iconic voice, which would add depth to the storyline. Instead of filming in Los Angeles, the story would be set in New York City, giving it a fresh, urban edge.
 
 
