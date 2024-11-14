@@ -1,7 +1,7 @@
 ---
-title: "Mini-Project #03: Do Proportional Electoral College Allocations Yield a More Representative Presidency?" 
+title: "Mini-Project #03: Do Proportional Electoral College Allocations Yield a More Representative Presidency?"  
 
-By: Dani Servius
+By: Dani Servius 
 ---
 
 Introduction: For this assignment I analyzed if the the claim that the U.S. Electoral College systematically biases election results away from the popular vote. In January 2021, Democratic Party’s leading data analysts, David Shor, stated ["One underrated thing about the 2020 election is that the partisan bias of the electoral college, already at it's largest point in nearly a century, got substantially larger."](https://www.vox.com/2021/1/11/22224700/electoral-college-joe-biden-donald-trump-bias-four-points-one-chart) To analyze their claim, I worked with political data such as presidential election results under different allocations for presence or absence of bias.
