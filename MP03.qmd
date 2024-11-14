@@ -1,0 +1,338 @@
+---
+title: "Mini-Project #03: Do Proportional Electoral College Allocations Yield a More Representative Presidency?"
+
+By: Dani Servius
+---
+
+Introduction: For this assignment I analyzed if the the claim that the U.S. Electoral College systematically biases election results away from the popular vote. In January 2021, Democratic Party’s leading data analysts, David Shor, stated ["One underrated thing about the 2020 election is that the partisan bias of the electoral college, already at it's largest point in nearly a century, got substantially larger."](https://www.vox.com/2021/1/11/22224700/electoral-college-joe-biden-donald-trump-bias-four-points-one-chart) To analyze their claim, I worked with political data such as presidential election results under different allocations for presence or absence of bias.
+
+```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+house_of_reps<- readr::read_csv("1976_2022_house.csv")
+```
+
+```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+presidents_1976_2020<- readr::read_csv("1976_2020_president.csv")
+```
+
+
+
+## Exploration of Vote Count Data
+
+1.  Which states have gained and lost the most seats in the US House of Representatives between 1976 and 2022?
+
+To answer this question, I first calculated the changes in the House of Representatives. From the graph below we can see Texas has had the biggest increase in seats when we compare 1976 to 2022.
+
+```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+representative_changesBar <- house_of_reps |>
+  select(state, year,district )|>
+  filter(year == 1976 | year == 2022)|>
+  group_by(year, state) |>
+  summarise(seats = n_distinct(district), .groups = "drop") |>
+  ggplot(aes(x = state, y = seats, fill = factor(year))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Change in Seats by State (1976 vs 2022)",
+       x = "State",
+       y = "Number of Seats",
+       fill = "Year") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+print(representative_changesBar)
+
+```
+
+```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+
+library(dplyr)
+library(tidyr)
+library(readr)
+representative_changes <- house_of_reps|>
+  select (year,state,district)|>
+  distinct()|>
+  group_by(state, year)|>
+  summarize(seats = n())|>
+  ungroup()|>
+  pivot_wider(names_from = year, values_from = seats, values_fill = 0)|>
+  select(state,'1976','2022')|>
+  rename(seats_1976 = `1976`, seats_2022 = `2022`)|>
+  mutate(seat_change = seats_2022 - seats_1976)|> 
+  arrange(desc(seat_change)) 
+
+```
+
+2.  Are there any elections in our data where the election would have had a different outcome if the “fusion” system was not used and candidates only received the votes their received from their “major party line” (Democrat or Republican) and not their total number of votes across all lines?
+
+From our data, we know that there has been elections were the outcome with no fusion would have been different
+
+```{r echo = FALSE}
+#| message: false 
+#| warning: false
+#| code-fold: true
+
+
+library(dplyr)
+library(tidyr)
+library(readr)
+fusion_system <- house_of_reps|>
+  select (year, candidate, party, candidatevotes, totalvotes, fusion_ticket)|>
+  filter(fusion_ticket == TRUE)|>
+  group_by(candidate, year)|>
+  mutate(allpartyvotes = sum(candidatevotes))
+```
+
+```{r echo = FALSE}
+#| message: false 
+#| warning: false
+#| code-fold: true
+
+library(dplyr)
+library(tidyr)
+library(readr)
+fusion_system1 <- house_of_reps %>%
+  filter(fusion_ticket == TRUE, party %in% c('DEMOCRAT', 'REPUBLICAN'))|>
+  select (year, candidate, party, candidatevotes, totalvotes, fusion_ticket)|>
+  distinct(candidate, .keep_all = TRUE)|>
+  inner_join(fusion_system, by = "candidate")|>
+  select(year.x, candidate, party.x, candidatevotes.x, allpartyvotes, totalvotes.x)|>
+  distinct(candidate, .keep_all = TRUE)|>
+  rename(year = year.x , party =  party.x, candidatevotes = candidatevotes.x, totalvotes = totalvotes.x)|>
+  mutate(
+    outcome_with_fusion = ifelse(allpartyvotes == max(allpartyvotes), "Winner", "Loser"),
+    outcome_no_fusion = ifelse(totalvotes == max(totalvotes), "Winner", "Loser")
+  ) |>
+  filter(outcome_no_fusion== 'Winner')
+
+fusion_system1
+```
+
+3.  Do presidential candidates tend to run ahead of or run behind congressional candidates in the same state? That is, does a Democratic candidate for president tend to get more votes in a given state than all Democratic congressional candidates in the same state?
+
+Looking at the data I collected it seems Democratic candidate for president tend to get the about same votes in a given state compared to  Democratic congressional candidates
+
+```{r}
+#| message: false
+#| warning: false
+#| code-fold: true
+
+Popularity_vote_pres <- presidents_1976_2020 |>
+  filter(party_simplified == "DEMOCRAT") |>
+  select(year, state, candidate, candidatevotes, totalvotes, party_simplified)|>
+  group_by(state, year,party_simplified) |>
+  summarise(total_pres_votes = sum(candidatevotes), .groups = "drop")
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| code-fold: true
+
+Popularity_vote_house <- house_of_reps |>
+  filter(party == "DEMOCRAT") |>
+  select(year, state, candidate, candidatevotes, totalvotes, party)|>
+  group_by(state, year, party) |>
+  summarise(total_house_votes = sum(candidatevotes), .groups = "drop")
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| code-fold: true
+
+Popularity_vote <- Popularity_vote_pres|>
+  inner_join(Popularity_vote_house, by = c("state", "year"))|>
+  mutate(difference = total_pres_votes - total_house_votes)
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(Popularity_vote, aes(x = year, y = difference)) +
+  geom_line() +
+  labs(title = "Average Difference Between Presidential and Congressional Votes Over Time",
+       x = "Year",
+       y = "Average Vote Difference")
+```
+
+## Importing and Plotting Shape File Data
+
+```{r}
+library(tidyverse)
+library(sf)
+# Load necessary package
+library(sf)
+
+# Create a temporary directory and unzip the file
+td <- tempdir()
+zip_contents <- unzip("districts106.zip", exdir = td)
+
+# Find the .shp file within the unzipped contents
+fname_shp <- zip_contents[grepl("shp$", zip_contents)]
+
+# Read the shapefile
+district_map <- read_sf(fname_shp)
+
+# Display the map data
+district_map
+
+```
+
+
+```{r}
+library(sf)
+
+td <- tempdir()
+us_map <- unzip("tl_2024_us_state.zip	", exdir = td)
+map_fname_shp <- zip_contents[grepl("shp$", zip_contents)]
+
+us_map <- read_sf(map_fname_shp)
+us_map
+```
+
+
+
+```{r}
+library(ggplot2)
+library(sf)
+
+# Plot the map using ggplot2
+ggplot(us_map, aes(geometry = geometry)) + 
+    geom_sf() +
+    theme_minimal() +
+    labs(title = "Map of US Districts",
+         caption = "Source: districts106 shapefile")
+```
+```{r}
+presidents_data <- presidents_1976_2020 %>%
+  filter(year == 2000, office == "US PRESIDENT") %>%
+  filter(candidate %in% c("BUSH, GEORGE W.", "GORE, AL")) %>%
+  group_by(state_po, party_simplified) %>%
+  summarise(total_votes = sum(candidatevotes, na.rm = TRUE)) %>%
+  ungroup() %>%
+  group_by(state_po) %>%
+  mutate(winner = party_simplified[which.max(total_votes)]) %>%
+  select(state_po, winner) %>%
+  distinct()
+
+# Check if presidents_data loaded correctly
+print(presidents_data)
+
+# Step 2: Load the shapefile
+shapefile_path <- "/Users/dani/Desktop/STA9750-2024-FALL/districtShapes/districts106.shp"  # Update path
+states_map <- st_read(shapefile_path <- "/Users/dani/Desktop/STA9750-2024-FALL/districtShapes/districts106.shp")
+
+# Check if states_map loaded correctly
+print(states_map)
+```
+
+
+
+
+
+
+```{r}
+# Load necessary libraries
+state_crosswalk <- tibble(
+  state_po = state.abb,
+  STATENAME = state.name)
+
+# Step 2: Add full state names to presidents_data
+presidents_data_full <- presidents_data %>%
+  left_join(state_crosswalk, by = "state_po")
+
+# Step 3: Join with states_map using STATENAME
+map_data <- states_map %>%
+  left_join(presidents_data_full, by = "STATENAME")
+  
+
+# Step 4: Check that map_data now has the winner column populated
+map_data_clean <- map_data %>%
+  filter(!is.na(winner))
+
+map_data_clean <- map_data_clean %>%
+  filter(STATENAME != "District Of Columbia")
+
+# Step 3: Plot the map
+ggplot(map_data) +
+  geom_sf(aes(fill = winner), color = "black", size = 0.2) +
+  scale_fill_manual(values = c("Democratic" = "blue", "Republican" = "red")) +
+  labs(title = "2000 Presidential Election Results by State",
+       fill = "Winning Party") +
+  theme_minimal()
+
+```
+
+
+##Comparing the Effects of ECV Allocation Rules
+
+
+1. State-Wide Winner-Take-All
+
+```{r}
+winner_take_all_state <- presidents_1976_2020|>
+  group_by(year,state,party_simplified,candidate)|>
+  summarize(totalvotes = sum(candidatevotes))|>
+  filter(totalvotes == max(totalvotes))|>
+  arrange(desc(totalvotes))|>
+  ungroup()
+```
+
+2. District-Wide Winner-Take-All + State-Wide “At Large” Votes
+
+```{r}
+district_winner_take_all <- house_of_reps|>
+  group_by(year,state,party,district,candidate)|>
+  summarize(totalvotes = sum(candidatevotes))|>
+  filter(totalvotes == max(totalvotes))|>
+  arrange(desc(totalvotes))
+```
+
+
+
+3. State-Wide Proportional
+
+```{r}
+winner_proportional <- presidents_1976_2020|>
+  group_by(year,state,party_simplified,candidate)|>
+  mutate(proportional = candidatevotes/totalvotes)|>
+  select(year,state,candidate,party_simplified,proportional)|>
+  arrange(desc(proportional))|>
+  ungroup()
+
+```
+
+4. National Proportional
+
+```{r}
+winner_national_proportional <- presidents_1976_2020|>
+  group_by(year,party_simplified,candidate)|>
+  mutate(candidate_votes = sum(candidatevotes))|>
+  mutate(total = sum(totalvotes))|>
+  mutate(national_proportional = candidate_votes/total)|>
+  arrange(desc(national_proportional))|>
+  ungroup()
+
+```
+
+Based on these allocation strategies, compare the winning presidential candidate with the actual historical winner.
+
+```{r}
+compare_winners <- left_join(winner_take_all_state,district_winner_take_all, by = 'year' )
+```
+
