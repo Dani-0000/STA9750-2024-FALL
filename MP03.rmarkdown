@@ -4,7 +4,11 @@ title: "Mini-Project #03: Do Proportional Electoral College Allocations Yield a 
 By: Dani Servius
 ---
 
+
+
 Introduction: For this assignment I analyzed if the the claim that the U.S. Electoral College systematically biases election results away from the popular vote. In January 2021, Democratic Party’s leading data analysts, David Shor, stated ["One underrated thing about the 2020 election is that the partisan bias of the electoral college, already at it's largest point in nearly a century, got substantially larger."](https://www.vox.com/2021/1/11/22224700/electoral-college-joe-biden-donald-trump-bias-four-points-one-chart) To analyze their claim, I worked with political data such as presidential election results under different allocations for presence or absence of bias.
+
+
 
 ```{r}
 #| echo: false 
@@ -20,11 +24,15 @@ house_of_reps<- readr::read_csv("1976_2022_house.csv")
 presidents_1976_2020<- readr::read_csv("1976_2020_president.csv")
 ```
 
+
+
 ## Exploration of Vote Count Data
 
 1.  Which states have gained and lost the most seats in the US House of Representatives between 1976 and 2022?
 
 To answer this question, I first calculated the changes in the House of Representatives. From the graph below we can see Texas has had the biggest increase in seats when we compare 1976 to 2022.
+
+
 
 ```{r}
 #| echo: false 
@@ -75,9 +83,13 @@ representative_changes <- house_of_reps|>
 
 ```
 
+
+
 2.  Are there any elections in our data where the election would have had a different outcome if the “fusion” system was not used and candidates only received the votes their received from their “major party line” (Democrat or Republican) and not their total number of votes across all lines?
 
 From our data, we know that there has been elections were the outcome with no fusion would have been different
+
+
 
 ```{r echo = FALSE}
 #| message: false 
@@ -120,9 +132,13 @@ fusion_system1 <- house_of_reps %>%
 fusion_system1
 ```
 
+
+
 3.  Do presidential candidates tend to run ahead of or run behind congressional candidates in the same state? That is, does a Democratic candidate for president tend to get more votes in a given state than all Democratic congressional candidates in the same state?
 
 Looking at the data I collected it seems Democratic candidate for president tend to get the about same votes in a given state compared to Democratic congressional candidates
+
+
 
 ```{r}
 #| message: false
@@ -168,7 +184,11 @@ ggplot(Popularity_vote, aes(x = year, y = difference)) +
        y = "Average Vote Difference")
 ```
 
+
+
 ## Importing and Plotting Shape File Data
+
+
 
 ```{r}
 library(tidyverse)
@@ -269,9 +289,13 @@ ggplot(map_data) +
 
 ```
 
+
+
 ##Comparing the Effects of ECV Allocation Rules
 
 1.  State-Wide Winner-Take-All
+
+
 
 ```{r}
 winner_take_all_state <- presidents_1976_2020|>
@@ -282,7 +306,11 @@ winner_take_all_state <- presidents_1976_2020|>
   ungroup()
 ```
 
+
+
 2.  District-Wide Winner-Take-All + State-Wide “At Large” Votes
+
+
 
 ```{r}
 district_winner_take_all <- house_of_reps|>
@@ -292,7 +320,11 @@ district_winner_take_all <- house_of_reps|>
   arrange(desc(totalvotes))
 ```
 
+
+
 3.  State-Wide Proportional
+
+
 
 ```{r}
 winner_proportional <- presidents_1976_2020|>
@@ -304,7 +336,11 @@ winner_proportional <- presidents_1976_2020|>
 
 ```
 
+
+
 4.  National Proportional
+
+
 
 ```{r}
 winner_national_proportional <- presidents_1976_2020|>
@@ -317,8 +353,13 @@ winner_national_proportional <- presidents_1976_2020|>
 
 ```
 
+
+
 Based on these allocation strategies, compare the winning presidential candidate with the actual historical winner.
+
+
 
 ```{r}
 compare_winners <- left_join(winner_take_all_state,district_winner_take_all, by = 'year' )
 ```
+
