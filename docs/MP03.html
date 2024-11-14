@@ -154,7 +154,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li>Which states have gained and lost the most seats in the US House of Representatives between 1976 and 2022?</li>
 </ol>
-<p>To answer this question, I first calculated the changes in the House of Representatives. From the graph below we can see Texas has had the biggest increase in seats when we compare 1976 to 2022.</p>
+<p>To answer this question, I first calculated the changes in the House of Representatives. From the graph below we can see leads with the most seats gained, followed by Florida, California, Arizona, and Georgia. States that have lost the most seats are New York with 13 seats lost, Ohio and Pennsylvania both tie with 8, then Illinois lost 7 and lastly Michigan with 6.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -164,59 +164,98 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 4
+  state      seats_1976 seats_2022 seat_change
+  &lt;chr&gt;           &lt;int&gt;      &lt;int&gt;       &lt;int&gt;
+1 TEXAS              24         38          14
+2 FLORIDA            15         28          13
+3 CALIFORNIA         43         52           9
+4 ARIZONA             4          9           5
+5 GEORGIA            10         14           4</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 4
+  state        seats_1976 seats_2022 seat_change
+  &lt;chr&gt;             &lt;int&gt;      &lt;int&gt;       &lt;int&gt;
+1 NEW YORK             39         26         -13
+2 OHIO                 23         15          -8
+3 PENNSYLVANIA         25         17          -8
+4 ILLINOIS             24         17          -7
+5 MICHIGAN             19         13          -6</code></pre>
+</div>
+</div>
 <ol start="2" type="1">
 <li>Are there any elections in our data where the election would have had a different outcome if the “fusion” system was not used and candidates only received the votes their received from their “major party line” (Democrat or Republican) and not their total number of votes across all lines?</li>
 </ol>
 <p>From our data, we know that there has been elections were the outcome with no fusion would have been different</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 8
+<pre><code># A tibble: 2 × 8
    year candidate        party      candidatevotes allpartyvotes totalvotes
   &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;               &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;
 1  2020 GEORGE AD SANTOS REPUBLICAN         147461        161931     398887
+2  2020 CHRIS JACOBS     REPUBLICAN         192619        228885     397802
 # ℹ 2 more variables: outcome_with_fusion &lt;chr&gt;, outcome_no_fusion &lt;chr&gt;</code></pre>
 </div>
 </div>
 <ol start="3" type="1">
 <li>Do presidential candidates tend to run ahead of or run behind congressional candidates in the same state? That is, does a Democratic candidate for president tend to get more votes in a given state than all Democratic congressional candidates in the same state?</li>
 </ol>
-<p>Looking at the data I collected it seems Democratic candidate for president tend to get the about same votes in a given state compared to Democratic congressional candidates</p>
+<p>Looking at the data I collected it seems Democratic candidate for president tend to run ahead congressional candidates in the same state by 318. The average difference is also pretty significant totaling 29538.93.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Popularity_vote_pres <span class="ot">&lt;-</span> presidents_1976_2020 <span class="sc">|&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(party_simplified <span class="sc">==</span> <span class="st">"DEMOCRAT"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(year, state, candidate, candidatevotes, totalvotes, party_simplified)<span class="sc">|&gt;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state, year,party_simplified) <span class="sc">|&gt;</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_pres_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>presidential_votes <span class="ot">&lt;-</span> presidents_1976_2020 <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(party_simplified <span class="sc">==</span> <span class="st">"DEMOCRAT"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state, year) <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_pres_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Popularity_vote_house <span class="ot">&lt;-</span> house_of_reps <span class="sc">|&gt;</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(party <span class="sc">==</span> <span class="st">"DEMOCRAT"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(year, state, candidate, candidatevotes, totalvotes, party)<span class="sc">|&gt;</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state, year, party) <span class="sc">|&gt;</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_house_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>reps_votes <span class="ot">&lt;-</span> house_of_reps <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(party <span class="sc">==</span> <span class="st">"DEMOCRAT"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state, year) <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_cong_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Popularity_vote <span class="ot">&lt;-</span> Popularity_vote_pres<span class="sc">|&gt;</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(Popularity_vote_house, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"state"</span>, <span class="st">"year"</span>))<span class="sc">|&gt;</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">difference =</span> total_pres_votes <span class="sc">-</span> total_house_votes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>vote_comparison <span class="ot">&lt;-</span> presidential_votes <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(reps_votes, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"state"</span>, <span class="st">"year"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">difference =</span> total_pres_votes <span class="sc">-</span> total_cong_votes)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>vote_comparison <span class="sc">|&gt;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">avg_difference =</span> <span class="fu">mean</span>(difference),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">pres_runs_ahead =</span> <span class="fu">sum</span>(difference <span class="sc">&gt;</span> <span class="dv">0</span>),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">pres_runs_behind =</span> <span class="fu">sum</span>(difference <span class="sc">&lt;</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  avg_difference pres_runs_ahead pres_runs_behind
+           &lt;dbl&gt;           &lt;int&gt;            &lt;int&gt;
+1         29539.             318              274</code></pre>
 </div>
+</div>
+<p>Does this trend differ over time? Onaverage over time the trends seems to increase.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(Popularity_vote, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> difference)) <span class="sc">+</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Average Difference Between Presidential and Congressional Votes Over Time"</span>,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Average Vote Difference"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(vote_comparison, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> difference)) <span class="sc">+</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Average Difference Between Presidential and Congressional Votes Over Time"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Vote Difference"</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -225,311 +264,184 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<p>Does it differ across states or across parties?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>trend_by_state <span class="ot">&lt;-</span> vote_comparison <span class="sc">|&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state) <span class="sc">|&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">avg_difference =</span> <span class="fu">mean</span>(difference), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(trend_by_state, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(state, avg_difference), <span class="at">y =</span> avg_difference)) <span class="sc">+</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Average Vote Difference by State"</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"State"</span>,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Vote Difference"</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="MP03_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="importing-and-plotting-shape-file-data" class="level2">
 <h2 class="anchored" data-anchor-id="importing-and-plotting-shape-file-data">Importing and Plotting Shape File Data</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ lubridate 1.9.3     ✔ tibble    3.2.1
-✔ purrr     1.0.2     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary package</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a temporary directory and unzip the file</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>td <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>zip_contents <span class="ot">&lt;-</span> <span class="fu">unzip</span>(<span class="st">"districts106.zip"</span>, <span class="at">exdir =</span> td)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Find the .shp file within the unzipped contents</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>fname_shp <span class="ot">&lt;-</span> zip_contents[<span class="fu">grepl</span>(<span class="st">"shp$"</span>, zip_contents)]</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the shapefile</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>district_map <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(fname_shp)</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the map data</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>district_map</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Simple feature collection with 436 features and 15 fields (with 1 geometry empty)
-Geometry type: MULTIPOLYGON
-Dimension:     XY
-Bounding box:  xmin: -179.1473 ymin: 18.9177 xmax: 179.7785 ymax: 71.35256
-Geodetic CRS:  GRS 1980(IUGG, 1980)
-# A tibble: 436 × 16
-   STATENAME  ID        DISTRICT STARTCONG ENDCONG DISTRICTSI COUNTY PAGE  LAW  
-   &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;
- 1 California 00610310… 26       103       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 2 California 00610310… 29       103       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 3 California 00610310… 30       103       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 4 Florida    01210510… 13       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 5 Florida    01210510… 14       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 6 Florida    01210510… 15       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 7 Florida    01210510… 19       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 8 Florida    01210510… 21       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 9 Illinois   01710310… 9        103       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
-10 Kentucky   02110510… 3        105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
-# ℹ 426 more rows
-# ℹ 7 more variables: NOTE &lt;chr&gt;, BESTDEC &lt;chr&gt;, RNOTE &lt;chr&gt;, FROMCOUNTY &lt;chr&gt;,
-#   LASTCHANGE &lt;chr&gt;, FINALNOTE &lt;chr&gt;, geometry &lt;MULTIPOLYGON [°]&gt;</code></pre>
+<pre><code>[1] "tl_2014_us_cd114"
+[1] "tl_2015_us_cd114"
+[1] "tl_2016_us_cd115"
+[1] "tl_2017_us_cd115"
+[1] "tl_2018_us_cd116"
+[1] "tl_2019_us_cd116"
+[1] "tl_2020_us_cd117"
+[1] "tl_2021_us_cd117"
+[1] "tl_2022_us_cd118"</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>td <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>us_map <span class="ot">&lt;-</span> <span class="fu">unzip</span>(<span class="st">"tl_2024_us_state.zip   "</span>, <span class="at">exdir =</span> td)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in unzip("tl_2024_us_state.zip\t", exdir = td): error 1 in extracting
-from zip file</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>map_fname_shp <span class="ot">&lt;-</span> zip_contents[<span class="fu">grepl</span>(<span class="st">"shp$"</span>, zip_contents)]</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>us_map <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(map_fname_shp)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>us_map</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Simple feature collection with 436 features and 15 fields (with 1 geometry empty)
-Geometry type: MULTIPOLYGON
-Dimension:     XY
-Bounding box:  xmin: -179.1473 ymin: 18.9177 xmax: 179.7785 ymax: 71.35256
-Geodetic CRS:  GRS 1980(IUGG, 1980)
-# A tibble: 436 × 16
-   STATENAME  ID        DISTRICT STARTCONG ENDCONG DISTRICTSI COUNTY PAGE  LAW  
-   &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;   &lt;chr&gt;      &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;
- 1 California 00610310… 26       103       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 2 California 00610310… 29       103       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 3 California 00610310… 30       103       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 4 Florida    01210510… 13       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 5 Florida    01210510… 14       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 6 Florida    01210510… 15       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 7 Florida    01210510… 19       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 8 Florida    01210510… 21       105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
- 9 Illinois   01710310… 9        103       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
-10 Kentucky   02110510… 3        105       107     &lt;NA&gt;       &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt; 
-# ℹ 426 more rows
-# ℹ 7 more variables: NOTE &lt;chr&gt;, BESTDEC &lt;chr&gt;, RNOTE &lt;chr&gt;, FROMCOUNTY &lt;chr&gt;,
-#   LASTCHANGE &lt;chr&gt;, FINALNOTE &lt;chr&gt;, geometry &lt;MULTIPOLYGON [°]&gt;</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the map using ggplot2</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(us_map, <span class="fu">aes</span>(<span class="at">geometry =</span> geometry)) <span class="sc">+</span> </span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>() <span class="sc">+</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Map of US Districts"</span>,</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">caption =</span> <span class="st">"Source: districts106 shapefile"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="MP03_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="MP03_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>presidents_data <span class="ot">&lt;-</span> presidents_1976_2020 <span class="sc">%&gt;%</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2000</span>, office <span class="sc">==</span> <span class="st">"US PRESIDENT"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(candidate <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"BUSH, GEORGE W."</span>, <span class="st">"GORE, AL"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state_po, party_simplified) <span class="sc">%&gt;%</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_votes =</span> <span class="fu">sum</span>(candidatevotes, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state_po) <span class="sc">%&gt;%</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">winner =</span> party_simplified[<span class="fu">which.max</span>(total_votes)]) <span class="sc">%&gt;%</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(state_po, winner) <span class="sc">%&gt;%</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'state_po'. You can override using the
-`.groups` argument.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if presidents_data loaded correctly</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(presidents_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 51 × 2
-# Groups:   state_po [51]
-   state_po winner    
-   &lt;chr&gt;    &lt;chr&gt;     
- 1 AK       REPUBLICAN
- 2 AL       REPUBLICAN
- 3 AR       REPUBLICAN
- 4 AZ       REPUBLICAN
- 5 CA       DEMOCRAT  
- 6 CO       REPUBLICAN
- 7 CT       DEMOCRAT  
- 8 DC       DEMOCRAT  
- 9 DE       DEMOCRAT  
-10 FL       REPUBLICAN
-# ℹ 41 more rows</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Load the shapefile</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>shapefile_path <span class="ot">&lt;-</span> <span class="st">"/Users/dani/Desktop/STA9750-2024-FALL/districtShapes/districts106.shp"</span>  <span class="co"># Update path</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>states_map <span class="ot">&lt;-</span> <span class="fu">st_read</span>(shapefile_path <span class="ot">&lt;-</span> <span class="st">"/Users/dani/Desktop/STA9750-2024-FALL/districtShapes/districts106.shp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `districts106' from data source 
-  `/Users/dani/Desktop/STA9750-2024-FALL/districtShapes/districts106.shp' 
-  using driver `ESRI Shapefile'
-Simple feature collection with 436 features and 15 fields (with 1 geometry empty)
-Geometry type: MULTIPOLYGON
-Dimension:     XY
-Bounding box:  xmin: -179.1473 ymin: 18.9177 xmax: 179.7785 ymax: 71.35256
-Geodetic CRS:  GRS 1980(IUGG, 1980)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if states_map loaded correctly</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(states_map)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Simple feature collection with 436 features and 15 fields (with 1 geometry empty)
+<pre><code>Simple feature collection with 436 features and 4 fields (with 1 geometry empty)
 Geometry type: MULTIPOLYGON
 Dimension:     XY
 Bounding box:  xmin: -179.1473 ymin: 18.9177 xmax: 179.7785 ymax: 71.35256
 Geodetic CRS:  GRS 1980(IUGG, 1980)
-First 10 features:
-    STATENAME           ID DISTRICT STARTCONG ENDCONG DISTRICTSI COUNTY PAGE
-1  California 006103107026       26       103     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-2  California 006103107029       29       103     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-3  California 006103107030       30       103     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-4     Florida 012105107013       13       105     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-5     Florida 012105107014       14       105     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-6     Florida 012105107015       15       105     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-7     Florida 012105107019       19       105     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-8     Florida 012105107021       21       105     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-9    Illinois 017103107009        9       103     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-10   Kentucky 021105107003        3       105     107       &lt;NA&gt;   &lt;NA&gt; &lt;NA&gt;
-    LAW NOTE BESTDEC RNOTE FROMCOUNTY                 LASTCHANGE
-1  &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-2  &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-3  &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-4  &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-5  &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-6  &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-7  &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-8  &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-9  &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-10 &lt;NA&gt; &lt;NA&gt;    &lt;NA&gt;  &lt;NA&gt;          F 2016-05-29 16:44:10.857626
-                    FINALNOTE                       geometry
-1  {"From US Census website"} MULTIPOLYGON (((-118.5075 3...
-2  {"From US Census website"} MULTIPOLYGON (((-118.354 34...
-3  {"From US Census website"} MULTIPOLYGON (((-118.184 34...
-4  {"From US Census website"} MULTIPOLYGON (((-82.42332 2...
-5  {"From US Census website"} MULTIPOLYGON (((-82.04014 2...
-6  {"From US Census website"} MULTIPOLYGON (((-80.71132 2...
-7  {"From US Census website"} MULTIPOLYGON (((-80.12946 2...
-8  {"From US Census website"} MULTIPOLYGON (((-80.27907 2...
-9  {"From US Census website"} MULTIPOLYGON (((-87.77996 4...
-10 {"From US Census website"} MULTIPOLYGON (((-85.63796 3...</code></pre>
+# A tibble: 436 × 5
+   STATENAME                           geometry DISTRICT winner party_simplified
+   &lt;chr&gt;                     &lt;MULTIPOLYGON [°]&gt; &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;           
+ 1 California (((-118.5075 34.33478, -118.5066… 26       GORE,… DEMOCRAT        
+ 2 California (((-118.354 34.16121, -118.3531 … 29       GORE,… DEMOCRAT        
+ 3 California (((-118.184 34.1492, -118.1847 3… 30       GORE,… DEMOCRAT        
+ 4 Florida    (((-82.42332 27.78074, -82.42316… 13       BUSH,… REPUBLICAN      
+ 5 Florida    (((-82.04014 27.03202, -81.99692… 14       BUSH,… REPUBLICAN      
+ 6 Florida    (((-80.71132 28.75914, -80.70973… 15       BUSH,… REPUBLICAN      
+ 7 Florida    (((-80.12946 26.63384, -80.12718… 19       BUSH,… REPUBLICAN      
+ 8 Florida    (((-80.27907 25.96417, -80.27857… 21       BUSH,… REPUBLICAN      
+ 9 Illinois   (((-87.77996 42.06533, -87.77186… 9        GORE,… DEMOCRAT        
+10 Kentucky   (((-85.63796 38.38055, -85.62494… 3        BUSH,… REPUBLICAN      
+# ℹ 426 more rows</code></pre>
 </div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load necessary libraries</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>state_crosswalk <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">state_po =</span> state.abb,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">STATENAME =</span> state.name)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Add full state names to presidents_data</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>presidents_data_full <span class="ot">&lt;-</span> presidents_data <span class="sc">%&gt;%</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(state_crosswalk, <span class="at">by =</span> <span class="st">"state_po"</span>)</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Join with states_map using STATENAME</span></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>map_data <span class="ot">&lt;-</span> states_map <span class="sc">%&gt;%</span></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(presidents_data_full, <span class="at">by =</span> <span class="st">"STATENAME"</span>)</span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: Check that map_data now has the winner column populated</span></span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>map_data_clean <span class="ot">&lt;-</span> map_data <span class="sc">%&gt;%</span></span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(winner))</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>map_data_clean <span class="ot">&lt;-</span> map_data_clean <span class="sc">%&gt;%</span></span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(STATENAME <span class="sc">!=</span> <span class="st">"District Of Columbia"</span>)</span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Plot the map</span></span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(map_data) <span class="sc">+</span></span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> winner), <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Democratic"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"Republican"</span> <span class="ot">=</span> <span class="st">"red"</span>)) <span class="sc">+</span></span>
-<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"2000 Presidential Election Results by State"</span>,</span>
-<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Winning Party"</span>) <span class="sc">+</span></span>
-<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="MP03_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>##Comparing the Effects of ECV Allocation Rules</p>
+</section>
+<section id="comparing-the-effects-of-ecv-allocation-rules" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-the-effects-of-ecv-allocation-rules">Comparing the Effects of ECV Allocation Rules</h2>
 <ol type="1">
 <li>State-Wide Winner-Take-All</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>winner_take_all_state <span class="ot">&lt;-</span> presidents_1976_2020<span class="sc">|&gt;</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year,state,party_simplified,candidate)<span class="sc">|&gt;</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">totalvotes =</span> <span class="fu">sum</span>(candidatevotes))<span class="sc">|&gt;</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(totalvotes <span class="sc">==</span> <span class="fu">max</span>(totalvotes))<span class="sc">|&gt;</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(totalvotes))<span class="sc">|&gt;</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'year', 'state', 'party_simplified'. You
-can override using the `.groups` argument.</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 5
+   year state      party_simplified candidate           totalvotes
+  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;            &lt;chr&gt;                    &lt;dbl&gt;
+1  2020 CALIFORNIA DEMOCRAT         BIDEN, JOSEPH R. JR   11110250
+2  2016 CALIFORNIA DEMOCRAT         CLINTON, HILLARY       8753788
+3  2008 CALIFORNIA DEMOCRAT         OBAMA, BARACK H.       8274473
+4  2012 CALIFORNIA DEMOCRAT         OBAMA, BARACK H.       7854285
+5  2004 CALIFORNIA DEMOCRAT         KERRY, JOHN            6745485</code></pre>
 </div>
 </div>
 <ol start="2" type="1">
 <li>District-Wide Winner-Take-All + State-Wide “At Large” Votes</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>district_winner_take_all <span class="ot">&lt;-</span> house_of_reps<span class="sc">|&gt;</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year,state,party,district,candidate)<span class="sc">|&gt;</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">totalvotes =</span> <span class="fu">sum</span>(candidatevotes))<span class="sc">|&gt;</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(totalvotes <span class="sc">==</span> <span class="fu">max</span>(totalvotes))<span class="sc">|&gt;</span></span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(totalvotes))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'year', 'state', 'party', 'district'. You
-can override using the `.groups` argument.</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 6
+# Groups:   year, state, party, district [5]
+   year state          party      district candidate       totalvotes
+  &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;                &lt;dbl&gt;
+1  2020 WASHINGTON     DEMOCRAT          7 PRAMILA JAYAPAL     387109
+2  2020 OREGON         DEMOCRAT          3 EARL BLUMENAUER     343574
+3  2020 PENNSYLVANIA   DEMOCRAT          3 DWIGHT EVANS        341708
+4  2020 NORTH CAROLINA DEMOCRAT         12 ALMA S ADAMS        341457
+5  2020 MONTANA        REPUBLICAN        0 MATT ROSENDALE      339169</code></pre>
 </div>
 </div>
 <ol start="3" type="1">
 <li>State-Wide Proportional</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>winner_proportional <span class="ot">&lt;-</span> presidents_1976_2020<span class="sc">|&gt;</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year,state,party_simplified,candidate)<span class="sc">|&gt;</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">proportional =</span> candidatevotes<span class="sc">/</span>totalvotes)<span class="sc">|&gt;</span></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(year,state,candidate,party_simplified,proportional)<span class="sc">|&gt;</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(proportional))<span class="sc">|&gt;</span></span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4,287 × 5
+    year state                candidate           party_simplified proportional
+   &lt;dbl&gt; &lt;chr&gt;                &lt;chr&gt;               &lt;chr&gt;                   &lt;dbl&gt;
+ 1  2008 DISTRICT OF COLUMBIA OBAMA, BARACK H.    DEMOCRAT                0.925
+ 2  2020 DISTRICT OF COLUMBIA BIDEN, JOSEPH R. JR DEMOCRAT                0.921
+ 3  2012 DISTRICT OF COLUMBIA OBAMA, BARACK H.    DEMOCRAT                0.909
+ 4  2016 DISTRICT OF COLUMBIA CLINTON, HILLARY    DEMOCRAT                0.905
+ 5  2004 DISTRICT OF COLUMBIA KERRY, JOHN         DEMOCRAT                0.892
+ 6  1984 DISTRICT OF COLUMBIA MONDALE, WALTER     DEMOCRAT                0.854
+ 7  1996 DISTRICT OF COLUMBIA CLINTON, BILL       DEMOCRAT                0.852
+ 8  2000 DISTRICT OF COLUMBIA GORE, AL            DEMOCRAT                0.852
+ 9  1992 DISTRICT OF COLUMBIA CLINTON, BILL       DEMOCRAT                0.846
+10  1988 DISTRICT OF COLUMBIA DUKAKIS, MICHAEL    DEMOCRAT                0.826
+# ℹ 4,277 more rows</code></pre>
+</div>
 </div>
 <ol start="4" type="1">
 <li>National Proportional</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>winner_national_proportional <span class="ot">&lt;-</span> presidents_1976_2020<span class="sc">|&gt;</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year,party_simplified,candidate)<span class="sc">|&gt;</span></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">candidate_votes =</span> <span class="fu">sum</span>(candidatevotes))<span class="sc">|&gt;</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">total =</span> <span class="fu">sum</span>(totalvotes))<span class="sc">|&gt;</span></span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">national_proportional =</span> candidate_votes<span class="sc">/</span>total)<span class="sc">|&gt;</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(national_proportional))<span class="sc">|&gt;</span></span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 18
+   year state      state_po state_fips state_cen state_ic office       candidate
+  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;         &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;    
+1  1984 ALABAMA    AL                1        63       41 US PRESIDENT REAGAN, …
+2  1984 ALASKA     AK                2        94       81 US PRESIDENT REAGAN, …
+3  1984 ARIZONA    AZ                4        86       61 US PRESIDENT REAGAN, …
+4  1984 ARKANSAS   AR                5        71       42 US PRESIDENT REAGAN, …
+5  1984 CALIFORNIA CA                6        93       71 US PRESIDENT REAGAN, …
+# ℹ 10 more variables: party_detailed &lt;chr&gt;, writein &lt;lgl&gt;,
+#   candidatevotes &lt;dbl&gt;, totalvotes &lt;dbl&gt;, version &lt;dbl&gt;, notes &lt;lgl&gt;,
+#   party_simplified &lt;chr&gt;, candidate_votes &lt;dbl&gt;, total &lt;dbl&gt;,
+#   national_proportional &lt;dbl&gt;</code></pre>
+</div>
 </div>
 <p>Based on these allocation strategies, compare the winning presidential candidate with the actual historical winner.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>compare_winners <span class="ot">&lt;-</span> <span class="fu">left_join</span>(winner_take_all_state,district_winner_take_all, <span class="at">by =</span> <span class="st">'year'</span> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in left_join(winner_take_all_state, district_winner_take_all, by = "year"): Detected an unexpected many-to-many relationship between `x` and `y`.
-ℹ Row 1 of `x` matches multiple rows in `y`.
-ℹ Row 1 of `y` matches multiple rows in `x`.
-ℹ If a many-to-many relationship is expected, set `relationship =
-  "many-to-many"` to silence this warning.</code></pre>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 9 × 10
+   year state.x party_simplified candidate.x totalvotes.x state.y party district
+  &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;            &lt;chr&gt;              &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;    &lt;dbl&gt;
+1  2020 CALIFO… DEMOCRAT         BIDEN, JOS…     11110250 WASHIN… DEMO…        7
+2  2020 CALIFO… DEMOCRAT         BIDEN, JOS…     11110250 OREGON  DEMO…        3
+3  2020 CALIFO… DEMOCRAT         BIDEN, JOS…     11110250 PENNSY… DEMO…        3
+4  2020 CALIFO… DEMOCRAT         BIDEN, JOS…     11110250 NORTH … DEMO…       12
+5  2020 CALIFO… DEMOCRAT         BIDEN, JOS…     11110250 MONTANA REPU…        0
+6  2016 CALIFO… DEMOCRAT         CLINTON, H…      8753788 &lt;NA&gt;    &lt;NA&gt;        NA
+7  2008 CALIFO… DEMOCRAT         OBAMA, BAR…      8274473 &lt;NA&gt;    &lt;NA&gt;        NA
+8  2012 CALIFO… DEMOCRAT         OBAMA, BAR…      7854285 &lt;NA&gt;    &lt;NA&gt;        NA
+9  2004 CALIFO… DEMOCRAT         KERRY, JOHN      6745485 &lt;NA&gt;    &lt;NA&gt;        NA
+# ℹ 2 more variables: candidate.y &lt;chr&gt;, totalvotes.y &lt;dbl&gt;</code></pre>
 </div>
 </div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  candidate       total_votes candidate_votes
+  &lt;chr&gt;                 &lt;dbl&gt;           &lt;dbl&gt;
+1 BUSH, GEORGE W.   112554197        50456169
+2 GORE, AL          119514412        50996062</code></pre>
+</div>
+</div>
+<p>After evaluating various Electoral College Vote (ECV) allocation schemes, I conclude that the State-Wide Proportional method is the fairest approach for allocating electoral votes in U.S. presidential elections. Under this scheme, electoral votes are distributed based on the proportion of the popular vote each candidate receives within each state. This method minimizes the winner-takes-all bias seen in other systems, where a candidate can win the state’s electoral votes with only a narrow margin in the popular vote.</p>
 
 
 </section>
