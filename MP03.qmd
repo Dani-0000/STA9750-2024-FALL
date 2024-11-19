@@ -363,10 +363,35 @@ ggplot(us_states_with_winner) +
        fill = "Winning Party") +
   theme_minimal()
 
+ggsave("us_states_with_winner.png", width = 20, height = 20, units = "in")
 
-us_states_with_winner
 
 ```
+Task 6: Advanced Chloropleth Visualization of Electoral College Results
+
+```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+library(ggplot2)
+library(sf)
+library(dplyr)
+
+ggplot(us_states_with_winner) +
+  geom_sf(aes(fill = party_simplified), color = "black", size = 0.2) +
+  scale_fill_manual(values = c("DEMOCRAT" = "blue", "REPUBLICAN" = "red")) +
+  labs(title = "2000 Presidential Election Results by Party",
+       fill = "Winning Party") +
+  facet_wrap(~party_simplified, ncol = 1) +
+  theme_minimal() +
+  theme(  
+    strip.text = element_text(size = 6), 
+    axis.text.x = element_text(angle = 90, hjust = 1) 
+  )
+
+```
+
 
 ## Comparing the Effects of ECV Allocation Rules
 
