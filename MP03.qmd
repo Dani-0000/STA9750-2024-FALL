@@ -367,6 +367,7 @@ ggsave("us_states_with_winner.png", width = 20, height = 20, units = "in")
 
 
 ```
+
 Task 6: Advanced Chloropleth Visualization of Electoral College Results
 
 ```{r}
@@ -391,7 +392,6 @@ ggplot(us_states_with_winner) +
   )
 
 ```
-
 
 ## Comparing the Effects of ECV Allocation Rules
 
@@ -502,3 +502,15 @@ print(votes_2000)
 ```
 
 After evaluating various Electoral College Vote (ECV) allocation schemes, I conclude that the State-Wide Proportional method is the fairest approach for allocating electoral votes in U.S. presidential elections. Under this scheme, electoral votes are distributed based on the proportion of the popular vote each candidate receives within each state. This method minimizes the winner-takes-all bias seen in other systems, where a candidate can win the state's electoral votes with only a narrow margin in the popular vote.
+
+## [**Citation**]{.underline} 
+
+MIT Election Data and Science Lab, 2017, "U.S. House 1976-2022," https://doi.org/10.7910/DVN/IGOUN2, Harvard Dataverse, v13, UNF:6: Ky5FkettbvohjTSN/IvldA== \[fileUNF\].
+
+MIT Election Data and Science Lab, 2017, "U.S. President 1976-2020," https://doi.org/10.7910/DVN/42MVDX, Harvard Dataverse, v8, UNF:6:F0opd1IRbeY190yVfzglUw== \[fileUNF\].
+
+https://cdmaps.polisci.ucla.edu/
+
+https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html
+
+\
