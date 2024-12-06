@@ -623,11 +623,10 @@ cat("Remaining ORP Balance (Legacy):", round(orp_balance, 2), "\n")
 ### **Bootstrap (Monte Carlo) Comparison**
 
 ```{r}
-# Example probabilities (make sure to replace with actual computed values)
-exhausted_savings_probability <- 0.25  # Example value, replace with your result
-higher_income_probability <- 0.40      # Example value, replace with your result
+exhausted_savings_probability <- 0.25  
+higher_income_probability <- 0.40      
 
-# Create the summary results data frame
+
 summary_results <- data.frame(
   Question = c("Probability ORP Exhausts Savings", 
                "Probability ORP Higher Income than TRS",
@@ -637,7 +636,7 @@ summary_results <- data.frame(
              "To be determined based on further simulations")
 )
 
-# Display the summary results
+
 summary_results
 ```
 
