@@ -623,6 +623,10 @@ cat("Remaining ORP Balance (Legacy):", round(orp_balance, 2), "\n")
 ### **Bootstrap (Monte Carlo) Comparison**
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
 exhausted_savings_probability <- 0.25  
 higher_income_probability <- 0.40      
 
