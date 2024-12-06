@@ -47,9 +47,9 @@ To begin the Monte Carlo analysis, I gathered historical data using FRED and Alp
 
 -   US Equity Market total returns (S&P 500) [^5]
 
--   International Equity Market total returns \[\^6\]
+-   International Equity Market total returns [^6]
 
--   Bond market total returns (Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity, Quoted on an Investment Basis) \[\^7\]
+-   Bond market total returns (Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity, Quoted on an Investment Basis) [^7]
 
 -   Short-term debt returns (Market Yield on U.S. Treasury Securities at 2-Year Constant Maturity, Quoted on an Investment Basis)
 
