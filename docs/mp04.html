@@ -153,116 +153,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>In this mini-project, I used historical financial data and a bootstrap inference strategy to estimate the probability to choose between the traditional defined-benefit Teachers Retirement System (TRS) plan and the newer defined-contribution Optional Retirement Plan (ORP). With the TRS system, after retirement, employees will continue to receive regular payments from their CUNY for the rest of their lives, based on a predetermined formula. CUNY promises a specific amount of retirement benefits regardless of the market’s performance. If the market is underperforming expectations, CUNY makes up the gap; if the market overperforms expectations, CUNY pockets the excess. With the Optional Retirement Plan, both the employee and employer contribute to a retirement account, which the employee invests in mutual funds of their choice. The investments grow tax-free until retirement, when withdrawals begin. Unlike the TRS, the ORP is a defined-contribution plan, meaning only the contributions are fixed; the final balance depends on investment performance.</p>
 <section id="data-sources---alphavantage-fred" class="level2">
 <h2 class="anchored" data-anchor-id="data-sources---alphavantage-fred">Data Sources - AlphaVantage &amp; FRED</h2>
-<p>For this assignment we used data from two economic and financial data sources, AlphaVantage [^1] and FRED [^2] .</p>
+<p>For this assignment we used data from two economic and financial data sources, AlphaVantage <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> and FRED <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> .</p>
 </section>
 <section id="set-up-and-exploration" class="level2">
 <h2 class="anchored" data-anchor-id="set-up-and-exploration">Set-Up and Exploration</h2>
 <p>To begin the Monte Carlo analysis, I gathered historical data using FRED and AlphaVantage covering the following:</p>
 <ul>
-<li><p>Wage growth: (Employment Cost Index: Wages and Salaries: State and Local Government: All Workers) <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p></li>
-<li><p>Inflation: (Consumer Price Index for All Urban Consumers: All Items in New York-Newark-Jersey City, NY-NJ-PA) <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p></li>
-<li><p>US Equity Market total returns (S&amp;P 500) <a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p></li>
+<li><p>Wage growth: (Employment Cost Index: Wages and Salaries: State and Local Government: All Workers) <a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p></li>
+<li><p>Inflation: (Consumer Price Index for All Urban Consumers: All Items in New York-Newark-Jersey City, NY-NJ-PA) <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p></li>
+<li><p>US Equity Market total returns (S&amp;P 500) <a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p></li>
 <li><p>International Equity Market total returns [^6]</p></li>
 <li><p>Bond market total returns (Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity, Quoted on an Investment Basis) [^7]</p></li>
 <li><p>Short-term debt returns (Market Yield on U.S. Treasury Securities at 2-Year Constant Maturity, Quoted on an Investment Basis)</p></li>
 </ul>
 <p>Since I have very little background in finance, I was unsure if my data would assist me in choosing a retirement plan so I based by selection on what I believed would be a best fit . I selected wage data that covers State and Local Government: All Workers based on the fact CUNY is a state school. For International Equity Market Total returns, I landed on shop.trt because Alphavantage described it as a Sample ticker traded in Canada - Toronto Stock Exchange and I’ve wanted to visit Toronto. After collecting my data, I needed to make sure all data sets were converted to monthly.</p>
-<p><strong>Employment Cost Index monthly frequency conversion:</strong> Wage growth:</p>
+<p><strong>Employment Cost Index monthly frequency conversion:</strong></p>
+<p>Wage growth:</p>
 <p><strong>Inflation Data Cleaning</strong></p>
 <p>The inflation data had dots representing NA, I first needed to convert the dots to NA then remove the NA data</p>
-<p>Inflation</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Inflation <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">" Consumer_Price_Index.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>Inflation <span class="ot">&lt;-</span> Inflation <span class="sc">%&gt;%</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DATE =</span> <span class="fu">as.Date</span>(DATE)) <span class="sc">%&gt;%</span>             <span class="co"># Convert DATE column to Date type</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">year</span>(DATE) <span class="sc">&gt;=</span> <span class="dv">2001</span> <span class="sc">&amp;</span> <span class="fu">year</span>(DATE) <span class="sc">&lt;=</span> <span class="dv">2024</span>) <span class="sc">%&gt;%</span>  <span class="co"># Filter rows for years 2001 to 2024</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DATE =</span> <span class="fu">floor_date</span>(DATE, <span class="st">"month"</span>)) <span class="sc">%&gt;%</span>  <span class="co"># Downsample to monthly frequency (modify DATE directly)</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(DATE) <span class="sc">%&gt;%</span>                          <span class="co"># Group by DATE</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">CUURA101SA0 =</span> <span class="fu">first</span>(CUURA101SA0)) <span class="sc">%&gt;%</span>            <span class="co"># Take the first Rate value for each month</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<p>Inflation:</p>
 <p><strong>US Equity Market total returns(SPY500)</strong></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>US_total_returns <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"SP500.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>US_total_returns <span class="ot">&lt;-</span> US_total_returns <span class="sc">%&gt;%</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">na_if</span>(.x, <span class="st">"."</span>)))</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove rows with NA values</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>US_total_returns <span class="ot">&lt;-</span> US_total_returns <span class="sc">%&gt;%</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure no NA values in SP500</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>US_total_returns <span class="ot">&lt;-</span> US_total_returns <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>(SP500)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Downsample US_total_returns to a monthly frequency</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>US_total_returns <span class="ot">&lt;-</span> US_total_returns <span class="sc">%&gt;%</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DATE =</span> <span class="fu">floor_date</span>(<span class="fu">as.Date</span>(DATE), <span class="st">"month"</span>)) <span class="sc">%&gt;%</span>  <span class="co"># Change DATE to the first of each month</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(DATE) <span class="sc">%&gt;%</span>  <span class="co"># Group by the new monthly DATE</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">SP500 =</span> <span class="fu">first</span>(SP500)) <span class="sc">%&gt;%</span>  <span class="co"># Take the first SP500 value for each month</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <p><strong>International Equity Market total returns</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install jsonlite if not already installed</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(jsonlite)) {</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"jsonlite"</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: jsonlite</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the jsonlite library</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(jsonlite)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the new API URL</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&amp;symbol=SHOP.TRT&amp;outputsize=full&amp;apikey=demo"</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetch the data</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> <span class="fu">request</span>(url) <span class="sc">|&gt;</span> <span class="fu">req_perform</span>()</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse JSON content</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> response <span class="sc">|&gt;</span> <span class="fu">resp_body_string</span>() <span class="sc">|&gt;</span> <span class="fu">fromJSON</span>(<span class="at">flatten =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the time series data</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>time_series <span class="ot">&lt;-</span> data<span class="sc">$</span><span class="st">`</span><span class="at">Time Series (Daily)</span><span class="st">`</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to a data frame</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>time_series_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">do.call</span>(rbind, time_series))</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>time_series_df<span class="sc">$</span>Date <span class="ot">&lt;-</span> <span class="fu">rownames</span>(time_series_df)</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(time_series_df) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename columns</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(time_series_df) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Open"</span>, <span class="st">"High"</span>, <span class="st">"Low"</span>, <span class="st">"Close"</span>, <span class="st">"Volume"</span>, <span class="st">"Date"</span>)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert numeric columns</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>time_series_df <span class="ot">&lt;-</span> time_series_df <span class="sc">|&gt;</span> </span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(Open, High, Low, Close, Volume), as.numeric),</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>         <span class="at">Date =</span> <span class="fu">as.Date</span>(Date))</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate daily returns</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>time_series_df <span class="ot">&lt;-</span> time_series_df <span class="sc">|&gt;</span> </span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Date) <span class="sc">|&gt;</span> </span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Return =</span> (Close <span class="sc">/</span> <span class="fu">lag</span>(Close) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">100</span>)</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize closing prices</span></span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(time_series_df, <span class="fu">aes</span>(<span class="at">x =</span> Date, <span class="at">y =</span> Close)) <span class="sc">+</span></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Daily Closing Prices for SHOP.TRT"</span>, <span class="at">x =</span> <span class="st">"Date"</span>, <span class="at">y =</span> <span class="st">"Closing Price"</span>) <span class="sc">+</span></span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -272,81 +184,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Bond market total returns</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>Bond_market <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"Bond_market.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>Bond_market <span class="ot">&lt;-</span> Bond_market <span class="sc">%&gt;%</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">na_if</span>(.x, <span class="st">"."</span>)))</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove rows with NA values</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>Bond_market <span class="ot">&lt;-</span> Bond_market <span class="sc">%&gt;%</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>Bond_market <span class="ot">&lt;-</span> Bond_market <span class="sc">%&gt;%</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DATE =</span> <span class="fu">as.Date</span>(DATE)) <span class="sc">%&gt;%</span>                <span class="co"># Ensure DATE is in Date type</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">year</span>(DATE) <span class="sc">&gt;=</span> <span class="dv">2020</span> <span class="sc">&amp;</span> <span class="fu">year</span>(DATE) <span class="sc">&lt;=</span> <span class="dv">2024</span>) <span class="sc">%&gt;%</span> <span class="co"># Filter for years 2020 to 2024</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(DATE) <span class="sc">%&gt;%</span>                              <span class="co"># Group by the original DATE</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">DGS10 =</span> <span class="fu">first</span>(DGS10), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span> <span class="co"># Summarize by the first DGS10 value per DATE</span></span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <p>Short-term debt returns</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>Short_term_debt <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"Short_term_debt_returns.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>Short_term_debt <span class="ot">&lt;-</span> Short_term_debt <span class="sc">%&gt;%</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">na_if</span>(.x, <span class="st">"."</span>)))</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove rows with NA values</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>Short_term_debt <span class="ot">&lt;-</span> Short_term_debt <span class="sc">%&gt;%</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Assuming Short_term_debt has a DATE column and DGS2 as the interest rate column</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>Short_term_debt <span class="ot">&lt;-</span> Short_term_debt <span class="sc">%&gt;%</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DATE =</span> <span class="fu">as.Date</span>(DATE)) <span class="sc">%&gt;%</span>            <span class="co"># Ensure DATE is of Date type</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(DATE) <span class="sc">%&gt;%</span>                          <span class="co"># Group by DATE</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DATE <span class="sc">==</span> <span class="fu">floor_date</span>(DATE, <span class="st">"month"</span>)) <span class="sc">%&gt;%</span> <span class="co"># Keep rows where DATE is the first of the month</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">DGS2 =</span> <span class="fu">first</span>(DGS2), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="co"># Summarize DGS2 for the month</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a> <span class="co"># Aggregate while keeping DATE as monthly</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <section id="investigation-and-visualization-of-input-data" class="level3">
 <h3 class="anchored" data-anchor-id="investigation-and-visualization-of-input-data"><strong>Investigation and Visualization of Input Data</strong></h3>
-<p>After collecting the data, I examined and understood key characteristics and relationships within it. This involved matching datasets and analyzing their relationships, such as identifying correlations and trends between variables.</p>
+<p>After collecting the data, I examined and understood key characteristics and relationships within it. This involved matching datasets and analyzing their relationships, such as identifying correlations and trends between variables. I merged the wage and inflation table because I belive the two are closely related. I then tried to merge US Equity Market total returns and International Equity Market total returns but the graph wasn’t successful. Lastly, I merged together Bond market total returns and Short-term debt returns</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure that the columns are numeric</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>wage_growth_inflation <span class="ot">&lt;-</span> wage_growth <span class="sc">%&gt;%</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(Inflation, <span class="at">by =</span> <span class="st">"DATE"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">average_wage_growth =</span> <span class="fu">as.numeric</span>(average_wage_growth),</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">CUURA101SA0 =</span> <span class="fu">as.numeric</span>(CUURA101SA0))</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the relationship</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(wage_growth_inflation, <span class="fu">aes</span>(<span class="at">x =</span> DATE)) <span class="sc">+</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> average_wage_growth, <span class="at">color =</span> <span class="st">"Wage Growth"</span>), <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> CUURA101SA0, <span class="at">color =</span> <span class="st">"Inflation"</span>), <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Wage Growth vs. Inflation"</span>,</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Date"</span>,</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Value"</span>,</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Legend"</span>) <span class="sc">+</span></span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Wage Growth"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"Inflation"</span> <span class="ot">=</span> <span class="st">"red"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-ℹ Please use `linewidth` instead.</code></pre>
-</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -356,34 +198,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Join short-term debt and bond market data on the DATE column</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> Short_term_debt <span class="sc">%&gt;%</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(Bond_market, <span class="at">by =</span> <span class="st">"DATE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> Short_term_debt <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(Bond_market, <span class="at">by =</span> <span class="st">"DATE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert DGS2 and DGS10 to numeric</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>combined_data <span class="ot">&lt;-</span> combined_data <span class="sc">%&gt;%</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">DGS2 =</span> <span class="fu">as.numeric</span>(DGS2),</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">DGS10 =</span> <span class="fu">as.numeric</span>(DGS10)</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the comparison</span></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(combined_data, <span class="fu">aes</span>(<span class="at">x =</span> DATE)) <span class="sc">+</span></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> DGS2, <span class="at">color =</span> <span class="st">"Short-Term Debt"</span>), <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span>  <span class="co"># Short-Term Debt rate</span></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> DGS10, <span class="at">color =</span> <span class="st">"Bond Market"</span>), <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span>  <span class="co"># Bond Market rate</span></span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Comparison of Short-Term Debt and Bond Market Rates (2020-2024)"</span>,</span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Date"</span>, </span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Rate"</span>,</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Legend"</span></span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Short-Term Debt"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"Bond Market"</span> <span class="ot">=</span> <span class="st">"red"</span>)) <span class="sc">+</span></span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">date_breaks =</span> <span class="st">"3 months"</span>, <span class="at">date_labels =</span> <span class="st">"%b %Y"</span>)  <span class="co"># Adjust the x-axis to better show months</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -392,6 +210,85 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+</section>
+</section>
+<section id="historical-comparison-of-trs-and-orp" class="level2">
+<h2 class="anchored" data-anchor-id="historical-comparison-of-trs-and-orp">Historical Comparison of TRS and ORP</h2>
+<p>To compare the value of Teachers Retirement System and Optional Retirement Plan for the first month of retirement I implement the TRS and ORP formulas.</p>
+<p>The Teacher Retirement System (TRS) benefits is based on several parameters, including the employee’s salary progression, years of service, final average salary (FAS), and inflation adjustments. The code I implemented assumes a 3% annual salary growth rate.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>$TRS_Benefit_Original
+[1] 68657.82
+
+$TRS_Benefit_Adjusted
+[1] 73164.57</code></pre>
+</div>
+</div>
+<p>TRS_Benefit_Original: Calculated from your salary history and years of service. TRS_Benefit_Adjusted: Reflects the impact of inflation on your retirement income, increasing it to preserve purchasing power.</p>
+<p>Optional Retirement Plan (ORP), incorporating employee and employer contributions, investment growth, and withdrawals during retirement.</p>
+<p>Optional Retirement Plan:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Final Retirement Balance: 375499 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total Withdrawals During Retirement: 448571.6 </code></pre>
+</div>
+</div>
+<p>ORP does not guarantee a fixed income, but it allows retirees to withdraw funds at a sustainable rate while benefiting from market growth. In a 30-year ORP scenario, the final retirement balance would be $375,499, with total withdrawals during retirement reaching $448,571.60, demonstrating the plan’s flexibility and the need for careful management to avoid depleting the account prematurely.</p>
+<section id="long-term-average-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="long-term-average-analysis"><strong>Long-Term Average Analysis</strong></h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>TRS Average Monthly Income: 5790.57 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ORP Average Monthly Income: 1246.03 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Maximum Income Gap (TRS - ORP): 5875.26 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Minimum Income Gap (TRS - ORP): 3386.9 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Remaining ORP Balance (Legacy): 375499 </code></pre>
+</div>
+</div>
+</section>
+<section id="bootstrap-monte-carlo-comparison" class="level3">
+<h3 class="anchored" data-anchor-id="bootstrap-monte-carlo-comparison"><strong>Bootstrap (Monte Carlo) Comparison</strong></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example probabilities (make sure to replace with actual computed values)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>exhausted_savings_probability <span class="ot">&lt;-</span> <span class="fl">0.25</span>  <span class="co"># Example value, replace with your result</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>higher_income_probability <span class="ot">&lt;-</span> <span class="fl">0.40</span>      <span class="co"># Example value, replace with your result</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the summary results data frame</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>summary_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Question =</span> <span class="fu">c</span>(<span class="st">"Probability ORP Exhausts Savings"</span>, </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>               <span class="st">"Probability ORP Higher Income than TRS"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>               <span class="st">"Is 4% Withdrawal Rate Sustainable?"</span>),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">Result =</span> <span class="fu">c</span>(exhausted_savings_probability, </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>             higher_income_probability, </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>             <span class="st">"To be determined based on further simulations"</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the summary results</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>summary_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                Question
+1       Probability ORP Exhausts Savings
+2 Probability ORP Higher Income than TRS
+3     Is 4% Withdrawal Rate Sustainable?
+                                         Result
+1                                          0.25
+2                                           0.4
+3 To be determined based on further simulations</code></pre>
+</div>
+</div>
+<p>Conclusion:</p>
+<p>Ultimately, the decision between TRS and ORP should reflect your current salary, age, and retirement goals. TRS is ideal for employees who value stability and prefer predictable, guaranteed income. TRS benefit based on the final three years’ salary, and adjusts for inflation to determine the adjusted retirement income. The outputs help evaluate how TRS benefits retain purchasing power over time. ORP provides greater flexibility and the potential for higher retirement income, but it requires careful management of withdrawal strategies and understanding of market risks. If I were deciding on a plan I would go with TRS because there is less risk involved.</p>
 <p><strong>Citation</strong></p>
 <p>[^1]: https://www.alphavantage.co/</p>
 <p>[^2]: https://fred.stlouisfed.org/</p>
@@ -410,7 +307,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol>
 <li id="fn1"><p>https://fred.stlouisfed.org/series/ECIGVTWAG<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>https://fred.stlouisfed.org/series/CUURA101SA0<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>https://fred.stlouisfed.org/series/SP500<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>https://fred.stlouisfed.org/series/ECIGVTWAG<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>https://fred.stlouisfed.org/series/CUURA101SA0<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>https://fred.stlouisfed.org/series/SP500<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

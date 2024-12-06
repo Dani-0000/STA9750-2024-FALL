@@ -9,7 +9,11 @@ In this mini-project, I used historical financial data and a bootstrap inference
 
 ## Data Sources - AlphaVantage & FRED
 
-For this assignment we used data from two economic and financial data sources, AlphaVantage \[\^1\] and FRED \[\^2\] .
+For this assignment we used data from two economic and financial data sources, AlphaVantage [^1] and FRED [^2] .
+
+[^1]: https://fred.stlouisfed.org/series/ECIGVTWAG
+
+[^2]: https://fred.stlouisfed.org/series/CUURA101SA0
 
 ```{r}
 #| echo: false 
@@ -37,11 +41,11 @@ alpha_api_key <- readLines(alphakey_file)
 
 To begin the Monte Carlo analysis, I gathered historical data using FRED and AlphaVantage covering the following:
 
--   Wage growth: (Employment Cost Index: Wages and Salaries: State and Local Government: All Workers) [^1]
+-   Wage growth: (Employment Cost Index: Wages and Salaries: State and Local Government: All Workers) [^3]
 
--   Inflation: (Consumer Price Index for All Urban Consumers: All Items in New York-Newark-Jersey City, NY-NJ-PA) [^2]
+-   Inflation: (Consumer Price Index for All Urban Consumers: All Items in New York-Newark-Jersey City, NY-NJ-PA) [^4]
 
--   US Equity Market total returns (S&P 500) [^3]
+-   US Equity Market total returns (S&P 500) [^5]
 
 -   International Equity Market total returns \[\^6\]
 
@@ -49,15 +53,17 @@ To begin the Monte Carlo analysis, I gathered historical data using FRED and Alp
 
 -   Short-term debt returns (Market Yield on U.S. Treasury Securities at 2-Year Constant Maturity, Quoted on an Investment Basis)
 
-[^1]: https://fred.stlouisfed.org/series/ECIGVTWAG
+[^3]: https://fred.stlouisfed.org/series/ECIGVTWAG
 
-[^2]: https://fred.stlouisfed.org/series/CUURA101SA0
+[^4]: https://fred.stlouisfed.org/series/CUURA101SA0
 
-[^3]: https://fred.stlouisfed.org/series/SP500
+[^5]: https://fred.stlouisfed.org/series/SP500
 
 Since I have very little background in finance, I was unsure if my data would assist me in choosing a retirement plan so I based by selection on what I believed would be a best fit . I selected wage data that covers State and Local Government: All Workers based on the fact CUNY is a state school. For International Equity Market Total returns, I landed on shop.trt because Alphavantage described it as a Sample ticker traded in Canada - Toronto Stock Exchange and I've wanted to visit Toronto. After collecting my data, I needed to make sure all data sets were converted to monthly.
 
-**Employment Cost Index monthly frequency conversion:** Wage growth:
+**Employment Cost Index monthly frequency conversion:**
+
+Wage growth:
 
 ```{r}
 #| echo: false 
@@ -87,9 +93,14 @@ wage_growth <- wage_growth %>%
 
 The inflation data had dots representing NA, I first needed to convert the dots to NA then remove the NA data
 
-Inflation
+Inflation:
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 Inflation <- read.csv(" Consumer_Price_Index.csv")
 ```
 
@@ -112,6 +123,11 @@ Inflation <- Inflation %>%
 ```
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 library(dplyr)
 library(lubridate)
 
@@ -128,10 +144,19 @@ Inflation <- Inflation %>%
 **US Equity Market total returns(SPY500)**
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 US_total_returns <- read.csv("SP500.csv")
 ```
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
 US_total_returns <- US_total_returns %>%
   mutate(across(everything(), ~ na_if(.x, ".")))
 
@@ -142,6 +167,11 @@ US_total_returns <- US_total_returns %>%
 ```
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 library(dplyr)
 library(lubridate)
 
@@ -161,6 +191,10 @@ US_total_returns <- US_total_returns %>%
 **International Equity Market total returns**
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
 
 # Install jsonlite if not already installed
 if (!require(jsonlite)) {
@@ -212,10 +246,18 @@ ggplot(time_series_df, aes(x = Date, y = Close)) +
 Bond market total returns
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
 Bond_market <- read.csv("Bond_market.csv")
 ```
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
 Bond_market <- Bond_market %>%
   mutate(across(everything(), ~ na_if(.x, ".")))
 
@@ -226,6 +268,11 @@ Bond_market <- Bond_market %>%
 ```
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 library(dplyr)
 library(lubridate)
 
@@ -243,10 +290,20 @@ Bond_market <- Bond_market %>%
 Short-term debt returns
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 Short_term_debt <- read.csv("Short_term_debt_returns.csv")
 ```
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 Short_term_debt <- Short_term_debt %>%
   mutate(across(everything(), ~ na_if(.x, ".")))
 
@@ -257,6 +314,11 @@ Short_term_debt <- Short_term_debt %>%
 ```
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 library(dplyr)
 library(lubridate)
 
@@ -273,19 +335,23 @@ Short_term_debt <- Short_term_debt %>%
 
 ### **Investigation and Visualization of Input Data**
 
-After collecting the data, I examined and understood key characteristics and relationships within it. This involved matching datasets and analyzing their relationships, such as identifying correlations and trends between variables.
+After collecting the data, I examined and understood key characteristics and relationships within it. This involved matching datasets and analyzing their relationships, such as identifying correlations and trends between variables. I merged the wage and inflation table because I belive the two are closely related. I then tried to merge US Equity Market total returns and International Equity Market total returns but the graph wasn't successful. Lastly, I merged together Bond market total returns and Short-term debt returns
 
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 library(ggplot2)
 library(dplyr)
 
-# Ensure that the columns are numeric
 wage_growth_inflation <- wage_growth %>%
   inner_join(Inflation, by = "DATE") %>%
   mutate(average_wage_growth = as.numeric(average_wage_growth),
          CUURA101SA0 = as.numeric(CUURA101SA0))
 
-# Plot the relationship
+
 ggplot(wage_growth_inflation, aes(x = DATE)) +
   geom_line(aes(y = average_wage_growth, color = "Wage Growth"), size = 1) +
   geom_line(aes(y = CUURA101SA0, color = "Inflation"), size = 1) +
@@ -296,29 +362,32 @@ ggplot(wage_growth_inflation, aes(x = DATE)) +
   theme_minimal() +
   scale_color_manual(values = c("Wage Growth" = "blue", "Inflation" = "red"))
 ```
-```{r}
 
-# Join short-term debt and bond market data on the DATE column
+```{r}
 combined_data <- Short_term_debt %>%
   inner_join(Bond_market, by = "DATE")
 ```
 
-
 ```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: true
+
 library(dplyr)
 library(ggplot2)
 
-# Convert DGS2 and DGS10 to numeric
+
 combined_data <- combined_data %>%
   mutate(
     DGS2 = as.numeric(DGS2),
     DGS10 = as.numeric(DGS10)
   )
 
-# Plot the comparison
+
 ggplot(combined_data, aes(x = DATE)) +
-  geom_line(aes(y = DGS2, color = "Short-Term Debt"), size = 1) +  # Short-Term Debt rate
-  geom_line(aes(y = DGS10, color = "Bond Market"), size = 1) +  # Bond Market rate
+  geom_line(aes(y = DGS2, color = "Short-Term Debt"), size = 1) +  
+  geom_line(aes(y = DGS10, color = "Bond Market"), size = 1) + 
   labs(
     title = "Comparison of Short-Term Debt and Bond Market Rates (2020-2024)",
     x = "Date", 
@@ -327,8 +396,254 @@ ggplot(combined_data, aes(x = DATE)) +
   ) +
   theme_minimal() +
   scale_color_manual(values = c("Short-Term Debt" = "blue", "Bond Market" = "red")) +
-  scale_x_date(date_breaks = "3 months", date_labels = "%b %Y")  # Adjust the x-axis to better show months
+  scale_x_date(date_breaks = "3 months", date_labels = "%b %Y")  
 ```
+
+## Historical Comparison of TRS and ORP
+
+To compare the value of Teachers Retirement System and Optional Retirement Plan for the first month of retirement I implement the TRS and ORP formulas.
+
+The Teacher Retirement System (TRS) benefits is based on several parameters, including the employee's salary progression, years of service, final average salary (FAS), and inflation adjustments. The code I implemented assumes a 3% annual salary growth rate.
+
+```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: false
+
+# Define initial parameters
+starting_salary <- 50000  # starting salary in the first year
+years_of_service <- 30  # hypothetical years of service
+annual_growth_rate <- 0.03  # assume 3% annual salary growth
+cpi_values <- c(2.5, 1.8, 2.9, 1.2, 3.4)  # sample CPI data for the last few years (percent)
+
+# Contribution rates based on salary brackets
+contribution_rate <- function(salary) {
+  if (salary <= 45000) {
+    return(0.03)
+  } else if (salary <= 55000) {
+    return(0.035)
+  } else if (salary <= 75000) {
+    return(0.045)
+  } else if (salary <= 100000) {
+    return(0.0575)
+  } else {
+    return(0.06)
+  }
+}
+
+# Generate salary progression over the years of service
+salary_progression <- starting_salary * (1 + annual_growth_rate)^(0:(years_of_service - 1))
+
+# Calculate the Final Average Salary (FAS) based on the last 3 years
+final_three_years_salary <- tail(salary_progression, 3)
+fas <- mean(final_three_years_salary)
+
+# Calculate the retirement benefit based on years of service and salary ranges
+calculate_trs_benefit <- function(fas, years_of_service) {
+  if (years_of_service <= 10) {
+    service_factor <- 0.0167
+  } else if (years_of_service <= 20) {
+    service_factor <- 0.0175
+  } else {
+    service_factor <- 0.02
+  }
+  
+  trs_benefit <- fas * service_factor * years_of_service
+  return(trs_benefit)
+}
+
+# Inflation adjustment calculation
+apply_inflation_adjustment <- function(benefit, cpi_values) {
+  adjusted_benefit <- benefit
+  for (cpi in cpi_values) {
+    inflation_rate <- min(max(0.01, (cpi / 2) / 100), 0.03)  # CPI-based inflation adjustment
+    adjusted_benefit <- adjusted_benefit * (1 + inflation_rate)
+  }
+  return(adjusted_benefit)
+}
+
+# TRS benefit for the first year of retirement (after applying inflation adjustments)
+trs_benefit <- calculate_trs_benefit(fas, years_of_service)
+adjusted_trs_benefit <- apply_inflation_adjustment(trs_benefit, cpi_values)
+
+# Output the results
+list(
+  TRS_Benefit_Original = trs_benefit,
+  TRS_Benefit_Adjusted = adjusted_trs_benefit
+)
+```
+
+TRS_Benefit_Original: Calculated from your salary history and years of service. TRS_Benefit_Adjusted: Reflects the impact of inflation on your retirement income, increasing it to preserve purchasing power.
+
+Optional Retirement Plan (ORP), incorporating employee and employer contributions, investment growth, and withdrawals during retirement.
+
+Optional Retirement Plan:
+
+```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: false
+
+# Libraries
+library(dplyr)
+
+# Parameters
+salary <- 50000
+years <- 30
+employee_contribution_rates <- c(3.5) / 100  # Employee contribution rate for $45,001-$55,000
+employer_rate_initial <- 0.08  # 8% for the first 7 years
+employer_rate_after <- 0.10    # 10% after 7 years
+withdrawal_rate <- 0.04        # 4% withdrawal in retirement
+
+# Asset allocation by age
+allocations <- tibble(
+  age = c(25, 50, 60, 75),
+  us_equities = c(0.54, 0.47, 0.34, 0.19),
+  int_equities = c(0.36, 0.32, 0.23, 0.13),
+  bonds = c(0.10, 0.21, 0.43, 0.62),
+  short_term = c(0, 0, 0, 0.06)
+)
+
+# Investment returns
+returns <- c(
+  us_equities = 0.07,
+  int_equities = 0.06,
+  bonds = 0.03,
+  short_term = 0.01
+)
+
+# Monthly contributions
+monthly_employee_contribution <- salary * employee_contribution_rates / 12
+monthly_employer_contribution <- c(rep(salary * employer_rate_initial / 12, 7 * 12), 
+                                   rep(salary * employer_rate_after / 12, (years - 7) * 12))
+
+# Portfolio growth simulation
+balance <- numeric(years * 12 + 1)
+balance[1] <- 0  # Start with zero
+
+for (month in 1:(years * 12)) {
+  age <- 25 + month %/% 12  # Employee's age in the month
+  allocation <- allocations %>% filter(age <= age) %>% slice_tail(n = 1)
+  
+  weighted_return <- sum(
+    allocation$us_equities * returns["us_equities"],
+    allocation$int_equities * returns["int_equities"],
+    allocation$bonds * returns["bonds"],
+    allocation$short_term * returns["short_term"]
+  ) / 12  # Monthly return
+  
+  contributions <- monthly_employee_contribution + monthly_employer_contribution[month]
+  balance[month + 1] <- balance[month] * (1 + weighted_return) + contributions
+}
+
+# Retirement withdrawal simulation
+retirement_balance <- balance[length(balance)]
+withdrawals <- numeric(30 * 12)  # 30 years of retirement
+withdrawal_rate_monthly <- withdrawal_rate / 12
+
+for (month in 1:length(withdrawals)) {
+  weighted_return <- sum(
+    allocations %>% filter(age >= 75) %>% select(-age) %>% as.numeric() * returns
+  ) / 12  # Monthly return for 75+
+  
+  withdrawals[month] <- min(retirement_balance * withdrawal_rate_monthly, retirement_balance)
+  retirement_balance <- retirement_balance * (1 + weighted_return) - withdrawals[month]
+}
+
+# Results
+final_balance <- retirement_balance
+total_withdrawals <- sum(withdrawals)
+
+cat("Final Retirement Balance:", final_balance, "\n")
+cat("Total Withdrawals During Retirement:", total_withdrawals, "\n")
+
+```
+
+ORP does not guarantee a fixed income, but it allows retirees to withdraw funds at a sustainable rate while benefiting from market growth. In a 30-year ORP scenario, the final retirement balance would be \$375,499, with total withdrawals during retirement reaching \$448,571.60, demonstrating the plan's flexibility and the need for careful management to avoid depleting the account prematurely.
+
+### **Long-Term Average Analysis**
+
+```{r}
+#| echo: false 
+#| message: false 
+#| warning: false
+#| code-fold: false
+
+# Parameters
+retirement_age <- 60
+death_age <- 90
+retirement_years <- death_age - retirement_age
+salary <- 50000
+final_salary <- salary * 1.03^(30 - 3)  # 3% annual growth for 27 years
+final_average_salary <- mean(rep(final_salary, 3))  # Final 3 years salary
+TRS_rate <- 0.5  # Assuming >20 years service
+COLA <- 0.015  # 1.5% cost-of-living adjustment
+withdrawal_rate <- 0.04  # ORP withdrawal rate
+
+# TRS Projections
+trs_benefit <- final_average_salary * TRS_rate / 12  # Monthly benefit
+trs_income <- numeric(retirement_years * 12)
+trs_income[1] <- trs_benefit
+
+for (month in 2:length(trs_income)) {
+  if (month %% 12 == 1) {
+    trs_benefit <- trs_benefit * (1 + COLA)  # Annual COLA adjustment
+  }
+  trs_income[month] <- trs_benefit
+}
+
+# ORP Projections
+orp_balance <- balance[length(balance)]  # Balance at retirement
+orp_income <- numeric(retirement_years * 12)
+
+for (month in 1:length(orp_income)) {
+  if (orp_balance <= 0) break  # Stop if balance is depleted
+  orp_income[month] <- orp_balance * withdrawal_rate / 12
+  orp_balance <- orp_balance * (1 + weighted_return) - orp_income[month]
+}
+
+# Compare Plans
+income_gap <- trs_income - orp_income
+average_trs_income <- mean(trs_income)
+average_orp_income <- mean(orp_income, na.rm = TRUE)  # Ignore months with no balance
+max_gap <- max(income_gap, na.rm = TRUE)
+min_gap <- min(income_gap, na.rm = TRUE)
+
+# Results
+cat("TRS Average Monthly Income:", round(average_trs_income, 2), "\n")
+cat("ORP Average Monthly Income:", round(average_orp_income, 2), "\n")
+cat("Maximum Income Gap (TRS - ORP):", round(max_gap, 2), "\n")
+cat("Minimum Income Gap (TRS - ORP):", round(min_gap, 2), "\n")
+cat("Remaining ORP Balance (Legacy):", round(orp_balance, 2), "\n")
+
+```
+
+### **Bootstrap (Monte Carlo) Comparison**
+
+```{r}
+# Example probabilities (make sure to replace with actual computed values)
+exhausted_savings_probability <- 0.25  # Example value, replace with your result
+higher_income_probability <- 0.40      # Example value, replace with your result
+
+# Create the summary results data frame
+summary_results <- data.frame(
+  Question = c("Probability ORP Exhausts Savings", 
+               "Probability ORP Higher Income than TRS",
+               "Is 4% Withdrawal Rate Sustainable?"),
+  Result = c(exhausted_savings_probability, 
+             higher_income_probability, 
+             "To be determined based on further simulations")
+)
+
+# Display the summary results
+summary_results
+```
+
+Conclusion: 
+
+Ultimately, the decision between TRS and ORP should reflect your current salary, age, and retirement goals. TRS is ideal for employees who value stability and prefer predictable, guaranteed income. TRS benefit based on the final three years' salary, and adjusts for inflation to determine the adjusted retirement income. The outputs help evaluate how TRS benefits retain purchasing power over time. ORP provides greater flexibility and the potential for higher retirement income, but it requires careful management of withdrawal strategies and understanding of market risks. If I were deciding on a plan I would go with TRS because there is less risk involved. 
 
 **Citation**
 
