@@ -66,10 +66,7 @@ Since I have very little background in finance, I was unsure if my data would as
 Wage growth:
 
 ```{r}
-#| echo: false 
-#| message: false 
-#| warning: false
-#| code-fold: true
+
 
 library(httr2)
 library(dplyr)
@@ -96,10 +93,6 @@ The inflation data had dots representing NA, I first needed to convert the dots 
 Inflation:
 
 ```{r}
-#| echo: false 
-#| message: false 
-#| warning: false
-#| code-fold: true
 
 Inflation <- read.csv(" Consumer_Price_Index.csv")
 ```
@@ -144,10 +137,6 @@ Inflation <- Inflation %>%
 **US Equity Market total returns(SPY500)**
 
 ```{r}
-#| echo: false 
-#| message: false 
-#| warning: false
-#| code-fold: true
 
 US_total_returns <- read.csv("SP500.csv")
 ```
@@ -246,10 +235,7 @@ ggplot(time_series_df, aes(x = Date, y = Close)) +
 Bond market total returns
 
 ```{r}
-#| echo: false 
-#| message: false 
-#| warning: false
-#| code-fold: true
+
 Bond_market <- read.csv("Bond_market.csv")
 ```
 
@@ -290,10 +276,6 @@ Bond_market <- Bond_market %>%
 Short-term debt returns
 
 ```{r}
-#| echo: false 
-#| message: false 
-#| warning: false
-#| code-fold: true
 
 Short_term_debt <- read.csv("Short_term_debt_returns.csv")
 ```
